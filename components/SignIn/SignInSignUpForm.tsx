@@ -7,8 +7,19 @@ import Button, { BUTTON_TYPE } from "../Button/Button";
 import EyeIcon from "../Icon/EyeIcon";
 import { ErrorMessageStyle } from "./SignInSignUpForm.styled";
 import PolicyConsentCheckbox from "../Checkbox/PolicyConsentCheckbox/PolicyConsentCheckbox";
+import createUser from "services/auth/createUser";
+import login from "services/auth/login";
+import { setAccessTokenCookie, setRefreshTokenCookie } from "@/utils/cookies";
+import { useRouter } from "next/router";
 
-type SignInSignUpDataFormType = {};
+type SignInSignUpDataFormType = {
+  username: string;
+  password: string;
+  confirm_password?: string;
+  email?: string;
+  gender?: number;
+  is_consent?: boolean;
+};
 
 type GenderType = {
   id: number;
@@ -56,6 +67,7 @@ const SignInSignUpForm = ({
     watch,
     formState: { errors },
   }: any = useForm();
+  const router = useRouter();
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
   const [selectedGender, setSelectedGender] = useState(GENDER_DATA[0]);
@@ -109,7 +121,18 @@ const SignInSignUpForm = ({
     }
   };
 
-  const onSubmit = (data: SignInSignUpDataFormType) => {
+  const signIn = async (data: { username: string; password: string }) => {
+    const response = await login(data);
+
+    if (response) {
+      setAccessTokenCookie(response.access_token);
+      setRefreshTokenCookie(response.refresh_token);
+    }
+
+    console.log("response", response);
+  };
+
+  const onSubmit = async (data: SignInSignUpDataFormType) => {
     let request: any = data;
 
     if (type === FORM_TYPE.SIGN_UP) {
@@ -117,9 +140,15 @@ const SignInSignUpForm = ({
       request.is_consent = validateConsent();
 
       if (request.gender && request.is_consent) {
-        //TODO: request to api
+        const response = await createUser(request);
+        //TODO: Login & save data to recoil & redirect
+        console.log("response", response);
       }
+    } else if (type === FORM_TYPE.SIGN_IN) {
+      signIn(data);
     }
+
+    router.push("/");
   };
 
   //TODO: remember me for 30 days

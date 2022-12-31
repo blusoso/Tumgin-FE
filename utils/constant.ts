@@ -3,6 +3,8 @@ export const ASSET_PATH = "/assets";
 export const ICON_PATH = `${ASSET_PATH}/icons`;
 export const IMAGE_PATH = `${ASSET_PATH}/images`;
 
+export const SOCIAL_LOGO_PATH = `${IMAGE_PATH}/social-logo`;
+
 export const TUMGIN_EMAIL = "tumgin@gmail.com";
 
 export const APP_NAME = "Tumgin";

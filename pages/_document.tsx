@@ -28,6 +28,17 @@ class MyDocument extends Document {
           />
 
           <script
+            src="https://apis.google.com/js/platform.js?onload=init"
+            async
+            defer
+          ></script>
+          <script
+            src="https://apis.google.com/js/platform.js"
+            async
+            defer
+          ></script>
+
+          <script
             src="https://accounts.google.com/gsi/client"
             async
             defer
