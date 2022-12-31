@@ -143,12 +143,12 @@ const SignInSignUpForm = ({
         const response = await createUser(request);
         //TODO: Login & save data to recoil & redirect
         console.log("response", response);
+        router.push("/preference");
       }
     } else if (type === FORM_TYPE.SIGN_IN) {
       signIn(data);
+      router.push("/");
     }
-
-    router.push("/");
   };
 
   //TODO: remember me for 30 days

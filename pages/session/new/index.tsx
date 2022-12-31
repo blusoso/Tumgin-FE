@@ -14,7 +14,10 @@ import SignInSignUpForm, {
 import FacebookSignIn from "@/components/SignIn/Facebook";
 import AuthLayout from "@/components/Layout/AuthLayout";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
-import { isAccessTokenExpired } from "@/utils/api/protectedRequest";
+import {
+  isAccessTokenExpired,
+  refreshAccessToken,
+} from "@/utils/api/protectedRequest";
 
 type NewSessionProps = {
   userDataCookie: any;
@@ -27,6 +30,7 @@ export enum LOGIN_WITH {
 
 const NewSession = ({ userDataCookie }: NewSessionProps) => {
   console.log("isAccessTokenExpired", isAccessTokenExpired());
+
   //TODO: if has a userData cookie -> 1. 1st time, redirect to preference/tutorial 2.redirect to home page/
   const [auth, setAuth] = useRecoilState(authState);
 

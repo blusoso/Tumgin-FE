@@ -6,12 +6,14 @@ import { COOKIE_NAME, setAccessTokenCookie } from "@/utils/cookies";
 
 export const isAccessTokenExpired = () => {
   const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
+  const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
+
   try {
     const decodedToken: any = jwt.decode(accessToken, { complete: true });
     const exp = decodedToken?.payload?.exp;
     const currentTime = Math.floor(Date.now() / 1000);
 
-    return currentTime > exp;
+    return currentTime > exp || (refreshToken && !accessToken);
   } catch (error) {
     return true;
   }
@@ -20,19 +22,22 @@ export const isAccessTokenExpired = () => {
 export const refreshAccessToken = async () => {
   try {
     const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/login`,
-      {
-        refresh_token: refreshToken,
-      }
-    );
 
-    const { data } = response;
-    if (data.error) {
-      throw new Error(data.error);
-    } else {
-      setAccessTokenCookie(data.access_token);
-      return data.access_token;
+    if (refreshToken) {
+      const request = { refresh_token: String(refreshToken) };
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/refresh`,
+        request
+      );
+
+      const { data } = response;
+      if (data.error) {
+        throw new Error(data.error);
+      } else {
+        setAccessTokenCookie(data.access_token);
+        return data.access_token;
+      }
     }
   } catch (error) {
     console.error(error);
