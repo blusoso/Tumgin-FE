@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { deleteCookie } from "cookies-next";
 
 import { SelectBox } from "../Mixin/Mixin";
 import Input, { ERROR_TYPE, INPUT_TYPE } from "../Input/Input";
@@ -9,7 +10,11 @@ import { ErrorMessageStyle } from "./SignInSignUpForm.styled";
 import PolicyConsentCheckbox from "../Checkbox/PolicyConsentCheckbox/PolicyConsentCheckbox";
 import createUser from "services/auth/createUser";
 import login from "services/auth/login";
-import { setAccessTokenCookie, setRefreshTokenCookie } from "@/utils/cookies";
+import {
+  COOKIE_NAME,
+  setAccessTokenCookie,
+  setRefreshTokenCookie,
+} from "@/utils/cookies";
 import { useRouter } from "next/router";
 
 type SignInSignUpDataFormType = {
@@ -121,10 +126,16 @@ const SignInSignUpForm = ({
     }
   };
 
+  const clearOldToken = () => {
+    deleteCookie(COOKIE_NAME.ACCESS_TOKEN);
+    deleteCookie(COOKIE_NAME.REFRESH_TOKEN);
+  };
+
   const signIn = async (data: { username: string; password: string }) => {
     const response = await login(data);
 
     if (response) {
+      clearOldToken();
       setAccessTokenCookie(response.access_token);
       setRefreshTokenCookie(response.refresh_token);
     }

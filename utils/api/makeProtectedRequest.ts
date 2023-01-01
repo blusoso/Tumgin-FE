@@ -35,7 +35,6 @@ export const refreshAccessToken = async () => {
       if (data.error) {
         throw new Error(data.error);
       } else {
-        setAccessTokenCookie(data.access_token);
         return data.access_token;
       }
     }
@@ -45,21 +44,28 @@ export const refreshAccessToken = async () => {
   }
 };
 
-export enum Method {
+export enum METHOD {
   GET = "GET",
   POST = "POST",
   PUT = "PUT",
 }
 
-const protectedRequest = async (path: string, method: Method, data?: any) => {
-  if (isAccessTokenExpired()) {
-    const refreshedToken = await refreshAccessToken();
-    if (refreshedToken == null) {
-      return null;
-    }
-  }
+const makeProtectedRequest = async (
+  path: string,
+  method: METHOD,
+  data?: any
+) => {
+  let accessToken: any = "";
 
-  const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
+  if (isAccessTokenExpired()) {
+    accessToken = await refreshAccessToken();
+    if (accessToken) {
+      setAccessTokenCookie(accessToken);
+      console.log("set new cookie");
+    }
+  } else {
+    accessToken = getCookie(COOKIE_NAME.ACCESS_TOKEN);
+  }
 
   try {
     const response = await axios({
@@ -78,4 +84,4 @@ const protectedRequest = async (path: string, method: Method, data?: any) => {
   }
 };
 
-export default protectedRequest;
+export default makeProtectedRequest;

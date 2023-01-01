@@ -17,7 +17,7 @@ import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import {
   isAccessTokenExpired,
   refreshAccessToken,
-} from "@/utils/api/protectedRequest";
+} from "@/utils/api/makeProtectedRequest";
 
 type NewSessionProps = {
   userDataCookie: any;

@@ -20,9 +20,9 @@ export enum Role {
   ADMIN = "admin",
 }
 
-export type CreateUserResponse = {
+export type useResponse = {
   id: number;
-  profile_img: string;
+  profile_img?: string;
   role: Role;
   is_active: boolean;
   created_at: Date;
@@ -31,7 +31,7 @@ export type CreateUserResponse = {
 
 const createUser = async (
   request: CreateUserRequest
-): Promise<CreateUserResponse | undefined> => {
+): Promise<useResponse | undefined> => {
   try {
     const result = await axios.post(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/signup`,

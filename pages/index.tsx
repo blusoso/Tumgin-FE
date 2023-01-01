@@ -7,6 +7,10 @@ import RecipeCardList from "@/components/RecipeCardList/RecipeCardList";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import TabMenu from "@/components/TabMenu/TabMenu";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import getCurrentUser from "services/auth/getCurrentUser";
+import { useEffect } from "react";
+import { getCookie } from "cookies-next";
+import { COOKIE_NAME } from "@/utils/cookies";
 
 const TAB_MENU_LIST = [
   {
@@ -19,9 +23,24 @@ const TAB_MENU_LIST = [
   },
 ];
 
-export default function Home() {
+export default function Home({ user }: any) {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+
+  console.log("user", user);
+
+  const fetchCurrentUser = async () => {
+    const response = await getCurrentUser();
+    console.log("response", response);
+  };
+
+  useEffect(() => {
+    fetchCurrentUser();
+    const access: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
+    const refresh: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
+    console.log("access", access);
+    console.log("refresh", refresh);
+  }, []);
 
   const renderRecipeDesktop = (
     <div className="mt-5">
