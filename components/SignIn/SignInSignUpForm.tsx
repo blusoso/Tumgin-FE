@@ -12,6 +12,7 @@ import createUser from "services/auth/createUser";
 import login from "services/auth/login";
 import {
   COOKIE_NAME,
+  clearToken,
   setAccessTokenCookie,
   setRefreshTokenCookie,
 } from "@/utils/cookies";
@@ -126,16 +127,11 @@ const SignInSignUpForm = ({
     }
   };
 
-  const clearOldToken = () => {
-    deleteCookie(COOKIE_NAME.ACCESS_TOKEN);
-    deleteCookie(COOKIE_NAME.REFRESH_TOKEN);
-  };
-
   const signIn = async (data: { username: string; password: string }) => {
     const response = await login(data);
 
     if (response) {
-      clearOldToken();
+      clearToken();
       setAccessTokenCookie(response.access_token);
       setRefreshTokenCookie(response.refresh_token);
     }

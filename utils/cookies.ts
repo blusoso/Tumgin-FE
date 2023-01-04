@@ -1,4 +1,4 @@
-import { setCookie } from "cookies-next";
+import { deleteCookie, setCookie } from "cookies-next";
 import { convertDaysToSeconds, convertMinsToSeconds } from "./time";
 
 export enum COOKIE_NAME {
@@ -23,6 +23,11 @@ export const setRefreshTokenCookie = (refreshToken: string) => {
   setCookie(COOKIE_NAME.REFRESH_TOKEN, refreshToken, {
     maxAge: COOKIE_AGE.REFRESH_TOKEN,
   });
+};
+
+export const clearToken = () => {
+  deleteCookie(COOKIE_NAME.ACCESS_TOKEN);
+  deleteCookie(COOKIE_NAME.REFRESH_TOKEN);
 };
 
 // TODO: Use this below instead when up to production (HTTPS)

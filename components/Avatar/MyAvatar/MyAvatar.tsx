@@ -5,23 +5,23 @@ import BaseAvatar from "../BaseAvatar/BaseAvatar";
 import PingNotification from "@/components/Notification/PingNotification";
 
 type MyAvatarProps = {
+  img?: string;
   isNotification?: boolean;
+  onClick?: () => void;
 };
 
-const MyAvatar = ({ isNotification = false }: MyAvatarProps) => {
+const MyAvatar = ({ img, isNotification = false, onClick }: MyAvatarProps) => {
   const myAvatarImg = `${IMAGE_PATH}/avatar.png`;
 
   return (
-    <>
-      <div className="relative">
-        <BaseAvatar img={myAvatarImg} />
-        {isNotification && (
-          <div className="absolute top-0 right-0">
-            <PingNotification />
-          </div>
-        )}
-      </div>
-    </>
+    <div className="relative cursor-pointer" onClick={onClick}>
+      <BaseAvatar img={img || myAvatarImg} />
+      {isNotification && (
+        <div className="absolute top-0 right-0">
+          <PingNotification />
+        </div>
+      )}
+    </div>
   );
 };
 

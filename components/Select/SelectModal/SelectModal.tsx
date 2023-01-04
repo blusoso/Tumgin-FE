@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import BaseModal from "../../Modal/BaseModal/BaseModal";
 import { ThemeContext } from "styled-components";
 
@@ -8,6 +8,7 @@ export type SelectModalProps = {
   position?: string;
   color?: string;
   padding?: string;
+  width?: string;
 };
 
 const SelectModal = ({
@@ -16,6 +17,7 @@ const SelectModal = ({
   position,
   color,
   padding,
+  width,
 }: SelectModalProps) => {
   const themeContext = useContext(ThemeContext);
 
@@ -27,6 +29,7 @@ const SelectModal = ({
         isOpen={isOpen}
         hasClose={false}
         padding={padding}
+        width={width}
         childrenColor={color || themeContext.blackColor}
       >
         <>{children}</>

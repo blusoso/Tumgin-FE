@@ -34,23 +34,21 @@ const NewSession = ({ userDataCookie }: NewSessionProps) => {
   //TODO: if has a userData cookie -> 1. 1st time, redirect to preference/tutorial 2.redirect to home page/
   const [auth, setAuth] = useRecoilState(authState);
 
-  useEffect(() => {
-    if (userDataCookie) {
-      setAuth({ ...auth, userData: userDataCookie });
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (userDataCookie) {
+  //     setAuth({ ...auth, userData: userDataCookie });
+  //   }
+  // }, []);
 
   const handleToken = (token: string, type: LOGIN_WITH) => {
     //TODO: make sure the password not to store in a cookie, store just a session token
-    const userData = jwt.decode(token);
-    console.log("userData", userData);
-
-    setAuth({ ...auth, userData: userData });
-
-    // Set the token in a cookie
-    setCookie("userData", userData, {
-      maxAge: AUTH_MAX_AGE_SECONDS,
-    });
+    // const userData = jwt.decode(token);
+    // console.log("userData", userData);
+    // setAuth({ ...auth, userData: userData });
+    // // Set the token in a cookie
+    // setCookie("userData", userData, {
+    //   maxAge: AUTH_MAX_AGE_SECONDS,
+    // });
   };
 
   const authLayoutProps = {

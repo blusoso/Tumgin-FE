@@ -19,6 +19,7 @@ type LinkHoverProps = {
 
 export const LinkHover = styled.div<LinkHoverProps>`
   padding: ${({ padding }) => padding || DEFAULT_PADDING_SEARCH_SELECT_MODAL};
+  cursor: pointer;
 
   &:hover {
     color: ${({ theme }) => theme.greenColor};

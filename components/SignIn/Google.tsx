@@ -79,7 +79,7 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
   }, []);
 
   const login = useGoogleLogin({
-    flow: "auth-code",
+    // flow: "auth-code",
     onSuccess: handleCredentialResponse,
     onError: handleFailResponse,
   });
@@ -87,10 +87,10 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
   return (
     <>
       <GoogleLoginStyle>
-        <GoogleLogin
+        {/* <GoogleLogin
           onSuccess={handleCredentialResponse}
           onError={handleFailResponse}
-        />
+        /> */}
         <GoogleLoginButton onClick={() => login()}>
           <Image
             src={`${SOCIAL_LOGO_PATH}/google.png`}
@@ -100,6 +100,15 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
           />
           Sign in with Google
         </GoogleLoginButton>
+        {/* <GoogleLoginButton onClick={() => login()}>
+          <Image
+            src={`${SOCIAL_LOGO_PATH}/google.png`}
+            alt="Google logo"
+            width={LOGO_SIZE}
+            height={LOGO_SIZE}
+          />
+          Sign in with Google
+        </GoogleLoginButton> */}
       </GoogleLoginStyle>
 
       {/* <div id="div__sign-in"></div> */}

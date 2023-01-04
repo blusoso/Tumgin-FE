@@ -11,6 +11,8 @@ import getCurrentUser from "services/auth/getCurrentUser";
 import { useEffect } from "react";
 import { getCookie } from "cookies-next";
 import { COOKIE_NAME } from "@/utils/cookies";
+import { useRecoilState } from "recoil";
+import { authState } from "../recoils";
 
 const TAB_MENU_LIST = [
   {
@@ -23,15 +25,16 @@ const TAB_MENU_LIST = [
   },
 ];
 
-export default function Home({ user }: any) {
+export default function Home() {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
-
-  console.log("user", user);
+  const [auth, setAuth] = useRecoilState(authState);
 
   const fetchCurrentUser = async () => {
     const response = await getCurrentUser();
-    console.log("response", response);
+    if (response) {
+      setAuth({ ...auth, user: response });
+    }
   };
 
   useEffect(() => {

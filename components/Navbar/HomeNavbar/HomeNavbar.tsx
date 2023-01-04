@@ -1,6 +1,9 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import { ThemeContext } from "styled-components";
+import { useRecoilValue } from "recoil";
+
+import { authState } from "@/recoils/index";
 
 import BaseNavbar from "@/components/Navbar/BaseNavbar/BaseNavbar";
 import Hamburger from "@/components/Hamburger/Hamburger";
@@ -16,6 +19,15 @@ import BellIcon from "@/components/Icon/BellIcon";
 import PingNotification from "@/components/Notification/PingNotification";
 import SearchRecipe from "@/components/Search/SearchRecipe/SearchRecipe";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import SelectModal from "@/components/Select/SelectModal/SelectModal";
+import { ProfileSelectWrapper } from "./HomeNavbar.styled";
+import { LinkHover } from "@/components/Search/SearchRecipe/SearchRecipe.styled";
+import { ReactSVG } from "react-svg";
+import { ICON_PATH } from "@/utils/constant";
+import BaseIcon from "@/components/Icon/BaseIcon";
+import { LOGIN_WITH } from "services/auth/createUser";
+import { googleLogout } from "@react-oauth/google";
+import { clearToken } from "@/utils/cookies";
 
 const NAVBAR_LIST: MENU_TYPE[] = [
   {
@@ -26,7 +38,7 @@ const NAVBAR_LIST: MENU_TYPE[] = [
     isActive: true,
   },
   {
-    id: "home",
+    id: "category",
     name: "ประเภท",
     icon: "home-outline",
     link: "/",
@@ -34,16 +46,29 @@ const NAVBAR_LIST: MENU_TYPE[] = [
   },
 ];
 
+export enum PROFILE_SETTING_ID {
+  LOGOUT = "logout",
+}
+
+const PROFILE_SETTING_LIST = [
+  { id: "logout", name: "ออกจากระบบ", icon: "log-out-outline" },
+];
+
 type HomeNavbarProps = {
   showNavMobile?: boolean;
 };
+
+const PROFILE_MODAL_PADDING = "0.6rem 0";
 
 const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
   const themeContext = useContext(ThemeContext);
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
-
   const router = useRouter();
+
+  const { user } = useRecoilValue(authState);
+  const [isOpenProfile, setIsOpenProfile] = useState(false);
+
   const username = "Bluso";
 
   const MENU_ICON_SIZE = "1.4rem";
@@ -62,6 +87,68 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
     router.push(menuLink);
   };
 
+  const handleLogout = () => {
+    clearToken();
+
+    switch (user?.login_with) {
+      case LOGIN_WITH.GOOGLE:
+        googleLogout();
+        break;
+
+      case LOGIN_WITH.FACEBOOK:
+        break;
+
+      case LOGIN_WITH.SITE:
+      default:
+        break;
+    }
+
+    router.reload();
+  };
+
+  const handleProfileSettingLink = (profileSettingId: string) => {
+    if (profileSettingId === PROFILE_SETTING_ID.LOGOUT) {
+      handleLogout();
+    }
+  };
+
+  const renderMyAvatar = ({
+    showNotification,
+  }: {
+    showNotification: boolean;
+  }) => (
+    <div className="relative">
+      <MyAvatar
+        img={user?.profile_img}
+        isNotification={showNotification}
+        onClick={() => setIsOpenProfile(!isOpenProfile)}
+      />
+      <ProfileSelectWrapper>
+        <SelectModal
+          isOpen={isOpenProfile}
+          position="absolute"
+          width="12rem"
+          padding={PROFILE_MODAL_PADDING}
+        >
+          <>
+            {PROFILE_SETTING_LIST.map((item) => (
+              <LinkHover
+                key={`profile-setting__${item.id}`}
+                className="flex items-center gap-1"
+                onClick={() => handleProfileSettingLink(item.id)}
+              >
+                <BaseIcon iconWidth="1.2rem">
+                  <ReactSVG src={`${ICON_PATH}/${item.icon}.svg`} />
+                </BaseIcon>
+                {item.name}
+              </LinkHover>
+            ))}
+          </>
+        </SelectModal>
+      </ProfileSelectWrapper>
+    </div>
+  );
+
   const rightDesktop = () => (
     <>
       <div className="relative mr-5">
@@ -70,7 +157,7 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
           <PingNotification />
         </div>
       </div>
-      <MyAvatar isNotification={false} />
+      {renderMyAvatar({ showNotification: false })}
     </>
   );
 
@@ -96,7 +183,7 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
           <BaseNavbar
             left={<Hamburger />}
             center={welcomeText}
-            right={<MyAvatar isNotification={true} />}
+            right={renderMyAvatar({ showNotification: true })}
           />
         )
       ) : (
