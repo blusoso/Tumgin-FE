@@ -28,6 +28,8 @@ import BaseIcon from "@/components/Icon/BaseIcon";
 import { LOGIN_WITH } from "services/auth/createUser";
 import { googleLogout } from "@react-oauth/google";
 import { clearToken } from "@/utils/cookies";
+import { APP_NAME } from "@/utils/constant";
+import Button, { BUTTON_TYPE } from "@/components/Button/Button";
 
 const NAVBAR_LIST: MENU_TYPE[] = [
   {
@@ -69,7 +71,7 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
   const { user } = useRecoilValue(authState);
   const [isOpenProfile, setIsOpenProfile] = useState(false);
 
-  const username = "Bluso";
+  const username = user && user.username;
 
   const MENU_ICON_SIZE = "1.4rem";
   const MENU_ICON_COLOR = themeContext.grayColor;
@@ -149,17 +151,34 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
     </div>
   );
 
-  const rightDesktop = () => (
+  const userNavbar = (
     <>
-      <div className="relative mr-5">
-        <BellIcon />
-        <div className="absolute top-0 right-1">
-          <PingNotification />
+      {!(isMobile || isTablet) && (
+        <div className="relative mr-5">
+          <BellIcon />
+          <div className="absolute top-0 right-1">
+            <PingNotification />
+          </div>
         </div>
-      </div>
-      {renderMyAvatar({ showNotification: false })}
+      )}
+
+      {renderMyAvatar({
+        showNotification: isMobile || isTablet ? true : false,
+      })}
     </>
   );
+
+  const guestNavbar = (
+    <Button
+      id="sign_in__navbar"
+      type={BUTTON_TYPE.PRIMARY_OUTLINE}
+      onClick={() => router.push("/session/new")}
+    >
+      <>เข้าสู่ระบบ</>
+    </Button>
+  );
+
+  const rightNavbar = () => (user ? userNavbar : guestNavbar);
 
   const desktopMenu = (
     <div className="flex flex-col items-center p-4 mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white">
@@ -182,15 +201,15 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
         showNavMobile && (
           <BaseNavbar
             left={<Hamburger />}
-            center={welcomeText}
-            right={renderMyAvatar({ showNotification: true })}
+            center={user ? welcomeText : <h1>{APP_NAME}</h1>}
+            right={rightNavbar()}
           />
         )
       ) : (
         <BaseNavbar
           left={<Logo className="mb-2" />}
           center={desktopMenu}
-          right={rightDesktop()}
+          right={rightNavbar()}
         />
       )}
     </div>

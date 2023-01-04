@@ -5,6 +5,11 @@ import { useRouter } from "next/router";
 import styled from "styled-components";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import { useRecoilState } from "recoil";
+import { authState } from "@/recoils/index";
+import getCurrentUser from "@/services/auth/getCurrentUser";
+import { getCookie } from "cookies-next";
+import { COOKIE_NAME } from "@/utils/cookies";
 
 export const Main = styled.main``;
 
@@ -25,6 +30,10 @@ const Layout = ({ children }: LayoutProps) => {
   const { pathname } = router;
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+  const [auth, setAuth] = useRecoilState(authState);
+
+  const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
+  const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
 
   const [showFooter, setShowFooter] = useState(false);
 
@@ -42,6 +51,19 @@ const Layout = ({ children }: LayoutProps) => {
         break;
     }
   }, [pathname]);
+
+  const fetchCurrentUser = async () => {
+    const response = await getCurrentUser();
+    if (response) {
+      setAuth({ ...auth, user: response });
+    }
+  };
+
+  useEffect(() => {
+    if (accessToken && refreshToken) {
+      fetchCurrentUser();
+    }
+  }, []);
 
   return (
     <>

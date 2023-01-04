@@ -25,25 +25,26 @@ const TAB_MENU_LIST = [
   },
 ];
 
-export default function Home() {
+const Home = () => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
   const [auth, setAuth] = useRecoilState(authState);
 
-  const fetchCurrentUser = async () => {
-    const response = await getCurrentUser();
-    if (response) {
-      setAuth({ ...auth, user: response });
-    }
-  };
+  // const fetchCurrentUser = async () => {
+  //   const response = await getCurrentUser();
+  //   if (response) {
+  //     setAuth({ ...auth, user: response });
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchCurrentUser();
-    const access: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
-    const refresh: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
-    console.log("access", access);
-    console.log("refresh", refresh);
-  }, []);
+  // useEffect(() => {
+  //   const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
+  //   const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
+
+  //   if (accessToken && refreshToken) {
+  //     fetchCurrentUser();
+  //   }
+  // }, []);
 
   const renderRecipeDesktop = (
     <div className="mt-5">
@@ -86,4 +87,6 @@ export default function Home() {
       {isMobile ? renderRecipeMobile : renderRecipeDesktop}
     </>
   );
-}
+};
+
+export default Home;

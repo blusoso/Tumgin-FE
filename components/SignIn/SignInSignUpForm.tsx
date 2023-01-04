@@ -17,6 +17,9 @@ import {
   setRefreshTokenCookie,
 } from "@/utils/cookies";
 import { useRouter } from "next/router";
+import { useRecoilState } from "recoil";
+import { authState } from "@/recoils/index";
+import getCurrentUser from "@/services/auth/getCurrentUser";
 
 type SignInSignUpDataFormType = {
   username: string;
@@ -74,6 +77,8 @@ const SignInSignUpForm = ({
     formState: { errors },
   }: any = useForm();
   const router = useRouter();
+  const [auth, setAuth] = useRecoilState(authState);
+
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
   const [selectedGender, setSelectedGender] = useState(GENDER_DATA[0]);
@@ -127,6 +132,13 @@ const SignInSignUpForm = ({
     }
   };
 
+  const fetchCurrentUser = async () => {
+    const response = await getCurrentUser();
+    if (response) {
+      setAuth({ ...auth, user: response });
+    }
+  };
+
   const signIn = async (data: { username: string; password: string }) => {
     const response = await login(data);
 
@@ -134,9 +146,8 @@ const SignInSignUpForm = ({
       clearToken();
       setAccessTokenCookie(response.access_token);
       setRefreshTokenCookie(response.refresh_token);
+      fetchCurrentUser();
     }
-
-    console.log("response", response);
   };
 
   const onSubmit = async (data: SignInSignUpDataFormType) => {
