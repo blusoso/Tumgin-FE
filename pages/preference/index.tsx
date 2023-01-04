@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { setCookie } from "cookies-next";
+import { useRouter } from "next/router";
 
 import Allergy from "@/components/Preference/Allergy/Allergy";
 import ButtonFooter from "@/components/ButtonFooter/ButtonFooter";
@@ -10,6 +12,8 @@ import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { AllergyFooter } from "@/components/Preference/Allergy/Allergy.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import { COOKIE_AGE, COOKIE_NAME } from "@/utils/cookies";
+import { PATH_NAME } from "@/components/Layout/Layout";
 
 const ButtonWrapper = styled(AllergyFooter)`
   bottom: 1.6rem;
@@ -25,6 +29,8 @@ const LAST_STEP = TOTAL_STEP;
 const Preference = () => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+  const router = useRouter();
+  const { pathname } = router;
 
   const [step, setStep] = useState(1);
   const [isDone, setIsDone] = useState(false);
@@ -50,6 +56,15 @@ const Preference = () => {
       setIsDone(false);
     } else if (step == LAST_STEP) {
       setIsDone(true);
+      setCookie(COOKIE_NAME.SET_USER_PREFERENCE, true, {
+        maxAge: COOKIE_AGE.SET_USER_PREFERENCE,
+      });
+
+      if (pathname === PATH_NAME.SIGN_IN || pathname === PATH_NAME.SIGN_UP) {
+        router.push("/");
+      } else {
+        router.back();
+      }
     }
   };
 

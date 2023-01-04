@@ -37,6 +37,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
   const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
+  const userPreferenceCookie: any = getCookie(COOKIE_NAME.SET_USER_PREFERENCE);
 
   const [showFooter, setShowFooter] = useState(false);
 
@@ -73,6 +74,12 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     if (accessToken && refreshToken) {
       fetchCurrentUser();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!userPreferenceCookie) {
+      router.push("/preference");
     }
   }, []);
 

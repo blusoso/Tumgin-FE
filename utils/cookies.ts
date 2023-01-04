@@ -3,12 +3,14 @@ import { convertDaysToSeconds, convertMinsToSeconds } from "./time";
 
 export enum COOKIE_NAME {
   USER_DATA = "user_data",
+  SET_USER_PREFERENCE = "set_user_preference",
   COOKIE_CONSENT = "cookie_consent",
   ACCESS_TOKEN = "access_token",
   REFRESH_TOKEN = "refresh_token",
 }
 
 export enum COOKIE_AGE {
+  SET_USER_PREFERENCE = convertDaysToSeconds(365),
   ACCESS_TOKEN = convertMinsToSeconds(30),
   REFRESH_TOKEN = convertDaysToSeconds(30),
 }
