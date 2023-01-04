@@ -23,6 +23,8 @@ export enum PATH_NAME {
   PRIVACY_POLICY = "/privacy-policy",
   TERMS_OF_SERVICE = "/terms-of-service",
   RECIPE = "/recipe/[id]/[slug]",
+  SIGN_IN = "/session/new",
+  SIGN_UP = "/session/new/sign-up",
 }
 
 const Layout = ({ children }: LayoutProps) => {
@@ -31,6 +33,7 @@ const Layout = ({ children }: LayoutProps) => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
   const [auth, setAuth] = useRecoilState(authState);
+  const { user } = auth;
 
   const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
   const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
@@ -51,6 +54,14 @@ const Layout = ({ children }: LayoutProps) => {
         break;
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (pathname === PATH_NAME.SIGN_IN || pathname === PATH_NAME.SIGN_UP) {
+      if (user) {
+        router.push("/");
+      }
+    }
+  }, [pathname, user]);
 
   const fetchCurrentUser = async () => {
     const response = await getCurrentUser();
