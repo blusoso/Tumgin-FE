@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export type LoginRequest = {
-  username: string;
+  email: string;
   password: string;
 };
 

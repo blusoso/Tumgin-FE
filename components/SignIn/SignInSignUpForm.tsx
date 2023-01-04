@@ -9,7 +9,7 @@ import EyeIcon from "../Icon/EyeIcon";
 import { ErrorMessageStyle } from "./SignInSignUpForm.styled";
 import PolicyConsentCheckbox from "../Checkbox/PolicyConsentCheckbox/PolicyConsentCheckbox";
 import createUser from "services/auth/createUser";
-import login from "services/auth/login";
+import login, { LoginRequest, LoginResponse } from "services/auth/login";
 import {
   COOKIE_NAME,
   clearToken,
@@ -22,10 +22,10 @@ import { authState } from "@/recoils/index";
 import getCurrentUser from "@/services/auth/getCurrentUser";
 
 type SignInSignUpDataFormType = {
-  username: string;
+  email: string;
   password: string;
   confirm_password?: string;
-  email?: string;
+  username?: string;
   gender?: number;
   is_consent?: boolean;
 };
@@ -139,8 +139,8 @@ const SignInSignUpForm = ({
     }
   };
 
-  const signIn = async (data: { username: string; password: string }) => {
-    const response = await login(data);
+  const signIn = async (data: LoginRequest) => {
+    const response: LoginResponse | undefined = await login(data);
 
     if (response) {
       clearToken();
@@ -159,13 +159,22 @@ const SignInSignUpForm = ({
 
       if (request.gender && request.is_consent) {
         const response = await createUser(request);
-        //TODO: Login & save data to recoil & redirect
-        console.log("response", response);
-        router.push("/preference");
+
+        if (response) {
+          const loginRequest = {
+            email: response.email,
+            password: data.password,
+          };
+
+          signIn(loginRequest);
+          router.push("/preference");
+        }
       }
     } else if (type === FORM_TYPE.SIGN_IN) {
-      signIn(data);
-      router.push("/");
+      if (data) {
+        signIn(data);
+        router.push("/");
+      }
     }
   };
 
