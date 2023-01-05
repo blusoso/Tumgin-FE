@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { deleteCookie } from "cookies-next";
 
 import { SelectBox } from "../Mixin/Mixin";
 import Input, { ERROR_TYPE, INPUT_TYPE } from "../Input/Input";
@@ -11,7 +10,6 @@ import PolicyConsentCheckbox from "../Checkbox/PolicyConsentCheckbox/PolicyConse
 import createUser from "services/auth/createUser";
 import login, { LoginRequest, LoginResponse } from "services/auth/login";
 import {
-  COOKIE_NAME,
   clearToken,
   setAccessTokenCookie,
   setRefreshTokenCookie,
@@ -162,11 +160,11 @@ const SignInSignUpForm = ({
 
         if (response) {
           const loginRequest = {
-            email: response.email,
+            email: data.email,
             password: data.password,
           };
 
-          signIn(loginRequest);
+          await signIn(loginRequest);
           router.push("/preference");
         }
       }

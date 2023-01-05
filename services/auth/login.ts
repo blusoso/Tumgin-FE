@@ -2,7 +2,8 @@ import axios from "axios";
 
 export type LoginRequest = {
   email: string;
-  password: string;
+  password?: string;
+  login_with?: string;
 };
 
 export type LoginResponse = {

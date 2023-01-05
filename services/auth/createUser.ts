@@ -1,13 +1,23 @@
 import axios from "axios";
+import { ErrorResponse } from "../type/globalServiceType";
+
+export enum LOGIN_WITH {
+  SITE = "site",
+  GOOGLE = "google",
+  FACEBOOK = "facebook",
+}
 
 export type BaseUser = {
   username: string;
   email: string;
-  gender: number;
+  gender?: number;
 };
 
 export type UserCreate = {
-  password: string;
+  id?: number;
+  password?: string;
+  profile_img?: string;
+  login_with?: string;
   is_consent: boolean;
 } & BaseUser;
 
@@ -20,13 +30,7 @@ export enum Role {
   ADMIN = "admin",
 }
 
-export enum LOGIN_WITH {
-  SITE = "site",
-  GOOGLE = "google",
-  FACEBOOK = "facebook",
-}
-
-export type userResponse = {
+export type UserResponse = {
   id: number;
   profile_img?: string;
   role: Role;
@@ -34,11 +38,12 @@ export type userResponse = {
   login_with?: LOGIN_WITH;
   created_at: Date;
   updated_at?: Date;
-} & BaseUser;
+} & BaseUser &
+  ErrorResponse;
 
 const createUser = async (
-  request: CreateUserRequest
-): Promise<userResponse | undefined> => {
+  request: UserCreate
+): Promise<UserResponse | undefined> => {
   try {
     const result = await axios.post(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/signup`,

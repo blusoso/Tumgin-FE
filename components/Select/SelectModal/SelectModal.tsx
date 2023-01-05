@@ -9,6 +9,7 @@ export type SelectModalProps = {
   color?: string;
   padding?: string;
   width?: string;
+  onClose?: () => void;
 };
 
 const SelectModal = ({
@@ -18,8 +19,13 @@ const SelectModal = ({
   color,
   padding,
   width,
+  onClose,
 }: SelectModalProps) => {
   const themeContext = useContext(ThemeContext);
+
+  const handleCloseSelectModal = () => {
+    if (onClose) onClose();
+  };
 
   return (
     <>
@@ -31,6 +37,7 @@ const SelectModal = ({
         padding={padding}
         width={width}
         childrenColor={color || themeContext.blackColor}
+        onClose={handleCloseSelectModal}
       >
         <>{children}</>
       </BaseModal>

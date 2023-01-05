@@ -1,7 +1,7 @@
 import makeProtectedRequest, { METHOD } from "@/utils/api/makeProtectedRequest";
-import { userResponse } from "./createUser";
+import { UserResponse } from "./createUser";
 
-const getCurrentUser = async (): Promise<userResponse | undefined> => {
+const getCurrentUser = async (): Promise<UserResponse | undefined> => {
   try {
     const result = await makeProtectedRequest(`/auth/users/me`, METHOD.GET);
 

@@ -30,7 +30,6 @@ const Preference = () => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
   const router = useRouter();
-  const { pathname } = router;
 
   const [step, setStep] = useState(1);
   const [isDone, setIsDone] = useState(false);
@@ -60,11 +59,7 @@ const Preference = () => {
         maxAge: COOKIE_AGE.SET_USER_PREFERENCE,
       });
 
-      if (pathname === PATH_NAME.SIGN_IN || pathname === PATH_NAME.SIGN_UP) {
-        router.push("/");
-      } else {
-        router.back();
-      }
+      router.back();
     }
   };
 

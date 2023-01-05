@@ -18,15 +18,11 @@ import {
   isAccessTokenExpired,
   refreshAccessToken,
 } from "@/utils/api/makeProtectedRequest";
+import { LOGIN_WITH } from "@/services/auth/createUser";
 
 type NewSessionProps = {
   userDataCookie: any;
 };
-
-export enum LOGIN_WITH {
-  FACEBOOK = "FACEBOOK",
-  GOOGLE = "GOOGLE",
-}
 
 const NewSession = ({ userDataCookie }: NewSessionProps) => {
   console.log("isAccessTokenExpired", isAccessTokenExpired());
@@ -71,7 +67,10 @@ const NewSession = ({ userDataCookie }: NewSessionProps) => {
 
           <div className="my-5">
             <div className="mb-3">
-              <GoogleSignIn buttonText="Google" onResponse={handleToken} />
+              <GoogleSignIn
+                buttonText="Sign in with Google"
+                onResponse={handleToken}
+              />
             </div>
             {/* <FacebookSignIn buttonText="Facebook" onResponse={handleToken} /> */}
           </div>

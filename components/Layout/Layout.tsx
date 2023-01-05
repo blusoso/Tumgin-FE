@@ -56,12 +56,23 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }, [pathname]);
 
-  useEffect(() => {
+  const preventLoggedInUser = () => {
     if (pathname === PATH_NAME.SIGN_IN || pathname === PATH_NAME.SIGN_UP) {
       if (user) {
         router.push("/");
       }
     }
+  };
+
+  const redirectUserPreference = () => {
+    if (user && !userPreferenceCookie) {
+      router.push("/preference");
+    }
+  };
+
+  useEffect(() => {
+    preventLoggedInUser();
+    redirectUserPreference();
   }, [pathname, user]);
 
   const fetchCurrentUser = async () => {
@@ -74,12 +85,6 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     if (accessToken && refreshToken) {
       fetchCurrentUser();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!userPreferenceCookie) {
-      router.push("/preference");
     }
   }, []);
 

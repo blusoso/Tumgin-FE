@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { ThemeContext } from "styled-components";
 
 import {
@@ -71,7 +71,20 @@ const BaseModal = ({
   onPrimaryClick,
   onSecondaryClick,
 }: BaseModalProps) => {
-  const themeContext = useContext(ThemeContext);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event: any) => {
+  //     if (modalRef.current && !modalRef.current.contains(event.target)) {
+  //       if (onClose) onClose();
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [modalRef]);
 
   const handleCloseModal = () => {
     if (onClose) onClose();
@@ -101,8 +114,8 @@ const BaseModal = ({
     <>
       {isOpen && (
         <ModalOverlay
-          position={position}
           isOverlay={isOverlay}
+          position={position}
           alignItem={alignItem}
           top={top}
           bottom={bottom}
@@ -110,6 +123,7 @@ const BaseModal = ({
           right={right}
         >
           <ModalContent
+            ref={modalRef}
             hasBorder={hasBorder}
             padding={padding}
             width={width}
