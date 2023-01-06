@@ -4,6 +4,8 @@ import Input from "@/components/Input/Input";
 import React, { useState } from "react";
 import PreferenceTitle from "../PreferenceTitle/PreferenceTitle";
 import { AllergyCustomizeSection, AllergyList } from "./Allergy.styled";
+import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
+import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
 
 type AllergyType = {
   id: number;
@@ -27,6 +29,9 @@ const ALLERGIES_LIST: AllergyType[] = [
 ];
 
 const Allergy = () => {
+  const isMobile = useDetectMobile();
+  const isTablet = useDetectTablet();
+
   const [allergyList, setAllergyList] = useState<AllergyType[]>(ALLERGIES_LIST);
   const [selectedAllergyList, setSelectedAllergyList] = useState<string[]>([]);
   const [customAllergyValue, setCustomAllergyValue] = useState<string>("");
@@ -71,7 +76,9 @@ const Allergy = () => {
         title="คุณแพ้อาหารอะไรมั้ย?"
         subTitle="เลือกอาหารที่คุณแพ้หรือไม่ชอบ แล้วเราจะคัดสรรแต่สิ่งที่คุณชอบและทานได้มาให้คุณ"
       />
-      <AllergyList className="flex flex-wrap">
+      <AllergyList
+        className={`flex flex-wrap ${isMobile || isTablet ? "" : "mb-4"}`}
+      >
         {allergyList.map((allergy, key) => (
           <React.Fragment key={`allergy__${allergy.name}--${key}`}>
             <Button
@@ -92,7 +99,10 @@ const Allergy = () => {
         ))}
       </AllergyList>
 
-      <AllergyCustomizeSection className="container">
+      <AllergyCustomizeSection
+        className={`${isMobile || isTablet ? "container" : ""}`}
+        isDesktop={!(isMobile || isTablet)}
+      >
         <PreferenceTitle
           title="ไม่มีอาหารที่คุณแพ้ในรายการใช่มั้ย?"
           subTitle="เพิ่มเข้าไปในรายการด้านบน"

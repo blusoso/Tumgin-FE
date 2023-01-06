@@ -58,11 +58,15 @@ const PROFILE_SETTING_LIST = [
 
 type HomeNavbarProps = {
   showNavMobile?: boolean;
+  showCenter?: boolean;
 };
 
 const PROFILE_MODAL_PADDING = "0.6rem 0";
 
-const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
+const HomeNavbar = ({
+  showNavMobile = false,
+  showCenter = true,
+}: HomeNavbarProps) => {
   const themeContext = useContext(ThemeContext);
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
@@ -196,23 +200,37 @@ const HomeNavbar = ({ showNavMobile = false }: HomeNavbarProps) => {
   );
 
   return (
-    <div className="mb-5">
+    <>
       {isMobile || isTablet ? (
         showNavMobile && (
-          <BaseNavbar
-            left={<Hamburger />}
-            center={user ? welcomeText : <h1>{APP_NAME}</h1>}
-            right={rightNavbar()}
-          />
+          <div
+            className={`${showCenter ? "mb-5" : "mb-8"} ${
+              showCenter ? "" : "my-4"
+            }`}
+          >
+            <BaseNavbar
+              left={<Hamburger />}
+              center={
+                showCenter ? user ? welcomeText : <h1>{APP_NAME}</h1> : ""
+              }
+              right={rightNavbar()}
+            />
+          </div>
         )
       ) : (
-        <BaseNavbar
-          left={<Logo className="mb-2" />}
-          center={desktopMenu}
-          right={rightNavbar()}
-        />
+        <div
+          className={`${showCenter ? "mb-5" : "mb-8"} ${
+            showCenter ? "" : "my-4"
+          }`}
+        >
+          <BaseNavbar
+            left={<Logo className="mb-2" />}
+            center={showCenter ? desktopMenu : ""}
+            right={rightNavbar()}
+          />
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

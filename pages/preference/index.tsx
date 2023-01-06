@@ -9,16 +9,23 @@ import Button, { BUTTON_TYPE } from "@/components/Button/Button";
 import { renderChevronIcon } from "@/components/CookingProcessLayout/CookingProcessLayout";
 import PreferenceDiet from "@/components/Preference/PreferenceDiet/PreferenceDiet";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
-import { AllergyFooter } from "@/components/Preference/Allergy/Allergy.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
 import { COOKIE_AGE, COOKIE_NAME } from "@/utils/cookies";
-import { PATH_NAME } from "@/components/Layout/Layout";
+import HomeNavbar from "@/components/Navbar/HomeNavbar/HomeNavbar";
 
-const ButtonWrapper = styled(AllergyFooter)`
-  bottom: 1.6rem;
+type ButtonWrapperProps = {
+  isDesktop?: boolean;
+};
+
+const ButtonWrapper = styled.div<ButtonWrapperProps>`
+  ${({ isDesktop }) =>
+    !isDesktop && "position: absolute;left: 0;bottom: 1.6rem;"}
+  width: 100%;
 
   .button__icon--end {
+    ${({ isDesktop }) =>
+      !isDesktop && "position: absolute;left: 0;bottom: 1.6rem;"}
     margin-top: -0.35rem;
   }
 `;
@@ -64,42 +71,55 @@ const Preference = () => {
   };
 
   return (
-    <div className={`h-screen -mb-8 ${isMobile || isTablet ? "" : "pt-5"}`}>
-      <div className="text-center font-normal text-lg">อาหารที่เหมาะกับคุณ</div>
+    <>
+      <HomeNavbar showNavMobile={false} showCenter={false} />
+      <div className={`${isMobile || isTablet ? "h-screen -mb-8" : "px-96"}`}>
+        <div
+          className={`text-center font-normal ${
+            isMobile || isTablet ? "text-lg" : "text-xl"
+          }`}
+        >
+          อาหารที่เหมาะกับคุณ
+        </div>
 
-      <div className="my-4">
-        <ProgressBar current={step} total={TOTAL_STEP} isDone={isDone} />
-      </div>
+        <div className={`${isMobile || isTablet ? "my-4" : "my-6"}`}>
+          <ProgressBar current={step} total={TOTAL_STEP} isDone={isDone} />
+        </div>
 
-      {renderStep()}
+        {renderStep()}
 
-      {step === 1 ? (
-        <ButtonWrapper className="container">
-          <Button
-            type={BUTTON_TYPE.PRIMARY}
-            className="w-full"
-            padding="0.9rem"
-            fontSize="16px"
-            iconEnd={renderChevronIcon("right")}
-            onClick={onNext}
+        {step === 1 ? (
+          <ButtonWrapper
+            className={`${isMobile || isTablet ? "container" : "my-12"}`}
+            isDesktop={!(isMobile || isTablet)}
           >
-            <span>ต่อไป</span>
-          </Button>
-        </ButtonWrapper>
-      ) : (
-        <ButtonFooter
-          className="container"
-          leftButtonLabel="ย้อนกลับ"
-          leftButtonType={BUTTON_TYPE.SECONDARY}
-          leftButtonIconStart={renderChevronIcon("left")}
-          rightButtonLabel={step === LAST_STEP ? "เสร็จสิ้น" : "ต่อไป"}
-          rightButtonIconEnd={renderChevronIcon("right")}
-          width={isMobile || isTablet ? "100%" : "15%"}
-          onLeftClick={onBack}
-          onRightClick={onNext}
-        />
-      )}
-    </div>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              className={`${isMobile || isTablet ? "w-full" : "ml-auto"}`}
+              padding={`${isMobile || isTablet ? "0.9rem" : "0.9rem 5rem"}`}
+              fontSize="16px"
+              iconEnd={renderChevronIcon("right")}
+              onClick={onNext}
+            >
+              <span>ต่อไป</span>
+            </Button>
+          </ButtonWrapper>
+        ) : (
+          <ButtonFooter
+            className={`${isMobile || isTablet ? "container" : "my-12"}`}
+            isFixed={isMobile || isTablet ? true : false}
+            leftButtonLabel="ย้อนกลับ"
+            leftButtonType={BUTTON_TYPE.SECONDARY}
+            leftButtonIconStart={renderChevronIcon("left")}
+            rightButtonLabel={step === LAST_STEP ? "เสร็จสิ้น" : "ต่อไป"}
+            rightButtonIconEnd={renderChevronIcon("right")}
+            width={isMobile || isTablet ? "100%" : "30%"}
+            onLeftClick={onBack}
+            onRightClick={onNext}
+          />
+        )}
+      </div>
+    </>
   );
 };
 

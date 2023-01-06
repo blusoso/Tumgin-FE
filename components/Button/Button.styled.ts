@@ -51,7 +51,7 @@ export const ButtonStyled = styled.button<ButtonStyledProps>`
     border: 1px solid ${({ theme }) => theme.lightGrayColor};
 
     svg {
-      fill: ${({ theme }) => theme.lightGrayColor};
+      fill: ${({ theme }) => theme.lightGrayColor} !important;
     }
   }
 

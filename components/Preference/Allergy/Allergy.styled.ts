@@ -1,19 +1,20 @@
+import { HideScrollBar } from "@/components/Mixin/Mixin";
 import styled from "styled-components";
 
-export const AllergyList = styled.div`
+export const AllergyList = styled(HideScrollBar)`
   display: flex;
   flex-wrap: wrap;
   overflow: scroll;
   max-height: 19rem;
 `;
 
-export const AllergyFooter = styled.div`
-  position: absolute;
-  left: 0;
-  width: 100%;
-`;
+type AllergyCustomizeSectionProps = {
+  isDesktop: boolean;
+};
 
-export const AllergyCustomizeSection = styled(AllergyFooter)`
-  bottom: 6.5rem;
+export const AllergyCustomizeSection = styled.div<AllergyCustomizeSectionProps>`
+  ${({ isDesktop }) =>
+    !isDesktop && "position: absolute; left: 0; bottom: 6.5rem;"}
+  width: 100%;
   background-color: #fff;
 `;

@@ -7,6 +7,7 @@ import {
 
 type ButtonFooterProps = {
   type?: BUTTON_TYPE;
+  isFixed?: boolean;
   className?: string;
   leftButtonType?: BUTTON_TYPE;
   rightButtonType?: BUTTON_TYPE;
@@ -29,6 +30,7 @@ type ButtonFooterProps = {
 
 const ButtonFooter = ({
   type = BUTTON_TYPE.PRIMARY,
+  isFixed = true,
   className = "",
   leftButtonType = BUTTON_TYPE.PRIMARY,
   rightButtonType = BUTTON_TYPE.PRIMARY,
@@ -52,8 +54,8 @@ const ButtonFooter = ({
 
   return (
     <>
-      <ButtonFooterSection className={className}>
-        <ButtonFooterWrapper hasTwoButton={hasTwoButton}>
+      <ButtonFooterSection className={className} isFixed={isFixed}>
+        <ButtonFooterWrapper hasTwoButton={hasTwoButton} isFixed={isFixed}>
           <Button
             type={leftButtonType || type}
             icon={iconStart || leftButtonIconStart}
