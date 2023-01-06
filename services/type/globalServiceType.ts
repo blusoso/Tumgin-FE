@@ -4,6 +4,7 @@ export enum STATUS {
 }
 
 export type ErrorResponse = {
-  status: string;
-  message: string;
+  status: number;
+  statusText: string;
+  detail: string;
 };

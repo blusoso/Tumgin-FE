@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { SelectBox } from "../Mixin/Mixin";
@@ -7,8 +7,12 @@ import Button, { BUTTON_TYPE } from "../Button/Button";
 import EyeIcon from "../Icon/EyeIcon";
 import { ErrorMessageStyle } from "./SignInSignUpForm.styled";
 import PolicyConsentCheckbox from "../Checkbox/PolicyConsentCheckbox/PolicyConsentCheckbox";
-import createUser from "services/auth/createUser";
-import login, { LoginRequest, LoginResponse } from "services/auth/login";
+import createUser, { LOGIN_WITH } from "services/auth/createUser";
+import login, {
+  LoginData,
+  LoginRequest,
+  LoginResponse,
+} from "services/auth/login";
 import {
   clearToken,
   setAccessTokenCookie,
@@ -18,6 +22,8 @@ import { useRouter } from "next/router";
 import { useRecoilState } from "recoil";
 import { authState } from "@/recoils/index";
 import getCurrentUser from "@/services/auth/getCurrentUser";
+import { ErrorResponse } from "@/services/type/globalServiceType";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 
 type SignInSignUpDataFormType = {
   email: string;
@@ -85,6 +91,17 @@ const SignInSignUpForm = ({
     gender: "",
     isConsent: "",
   });
+  const [errorResponseMessage, setErrorResponseMessage] = useState<string>("");
+
+  const clearErrorResponseMessage = () => {
+    setErrorResponseMessage("");
+  };
+
+  useEffect(() => {
+    if (type === FORM_TYPE.SIGN_IN && errorResponseMessage) {
+      clearErrorResponseMessage();
+    }
+  }, [watch("email"), watch("password")]);
 
   const handleGender = (gender: GenderType) => {
     setSelectedGender(gender);
@@ -137,19 +154,42 @@ const SignInSignUpForm = ({
     }
   };
 
-  const signIn = async (data: LoginRequest) => {
-    const response: LoginResponse | undefined = await login(data);
-
+  const getSignInResponse = (
+    response: LoginResponse | ErrorResponse | undefined,
+    nextRoute: string
+  ) => {
     if (response) {
+      switch (response.status) {
+        case STATUS_CODE.UNAUTHORIZED:
+          setErrorResponseMessage((response as ErrorResponse).detail);
+          break;
+        case STATUS_CODE.OK:
+        default:
+          router.push(nextRoute);
+          break;
+      }
+    }
+  };
+
+  const signIn = async (loginRequest: LoginRequest) => {
+    const response: LoginResponse | ErrorResponse | undefined = await login(
+      loginRequest
+    );
+
+    if (response && response.status === STATUS_CODE.OK) {
+      const data: LoginData = (response as LoginResponse).data;
       clearToken();
-      setAccessTokenCookie(response.access_token);
-      setRefreshTokenCookie(response.refresh_token);
+      setAccessTokenCookie(data.access_token);
+      setRefreshTokenCookie(data.refresh_token);
       fetchCurrentUser();
     }
+
+    return response;
   };
 
   const onSubmit = async (data: SignInSignUpDataFormType) => {
     let request: any = data;
+    request.login_with = LOGIN_WITH.SITE;
 
     if (type === FORM_TYPE.SIGN_UP) {
       request.gender = validateGender();
@@ -164,14 +204,14 @@ const SignInSignUpForm = ({
             password: data.password,
           };
 
-          await signIn(loginRequest);
-          router.push("/preference");
+          const signInResponse = await signIn(loginRequest);
+          getSignInResponse(signInResponse, "/preference");
         }
       }
     } else if (type === FORM_TYPE.SIGN_IN) {
-      if (data) {
-        signIn(data);
-        router.push("/");
+      if (request) {
+        const signInResponse = await signIn(data);
+        getSignInResponse(signInResponse, "/");
       }
     }
   };
@@ -310,6 +350,10 @@ const SignInSignUpForm = ({
               </ErrorMessageStyle>
             )}
           </div>
+        )}
+
+        {errorResponseMessage && (
+          <ErrorMessageStyle>{errorResponseMessage}</ErrorMessageStyle>
         )}
       </div>
 

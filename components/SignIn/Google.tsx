@@ -1,67 +1,35 @@
-import React, { useEffect } from "react";
-import styled from "styled-components";
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
-import jwt from "jsonwebtoken";
-
-import { SOCIAL_LOGO_PATH } from "@/utils/constant";
+import React from "react";
+import { useGoogleLogin } from "@react-oauth/google";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import axios from "axios";
-import createUser, {
-  CreateUserRequest,
-  LOGIN_WITH,
-  UserCreate,
-} from "@/services/auth/createUser";
-import checkUserExist, {
-  USER_EXITED_MESSAGE,
-} from "@/services/auth/checkUserExist";
-import { STATUS } from "@/services/type/globalServiceType";
-import { useRouter } from "next/router";
-import login, { LoginRequest, LoginResponse } from "@/services/auth/login";
+import { useRecoilState } from "recoil";
+
+import { SOCIAL_LOGO_PATH } from "@/utils/constant";
 import {
   clearToken,
   setAccessTokenCookie,
   setRefreshTokenCookie,
 } from "@/utils/cookies";
-import { useRecoilState } from "recoil";
 import { authState } from "@/recoils/index";
+
+import createUser, { LOGIN_WITH, UserCreate } from "@/services/auth/createUser";
+import checkUserExist from "@/services/auth/checkUserExist";
+import { ErrorResponse } from "@/services/type/globalServiceType";
 import getCurrentUser from "@/services/auth/getCurrentUser";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
+import login, {
+  LoginData,
+  LoginRequest,
+  LoginResponse,
+} from "@/services/auth/login";
+
+import { GoogleLoginButton, GoogleLoginStyle } from "./Google.styled";
 
 type GoogleSignInProps = {
   buttonText: string;
   onResponse: (token: string, type: LOGIN_WITH) => void;
 };
-
-export const GoogleLoginStyle = styled.div`
-  button {
-    width: 100%;
-    color: ${({ theme }) => theme.blackColor};
-    font-family: "Mitr";
-    border: 1px solid ${({ theme }) => theme.lightGrayColor};
-    border-radius: ${({ theme }) => theme.borderRadiusSm};
-    box-shadow: none;
-    justify-content: center;
-
-    div {
-      padding: 5px;
-      margin-right: 0.4rem;
-    }
-
-    span {
-      font-weight: 400;
-    }
-  }
-`;
-
-export const GoogleLoginButton = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.5rem 0;
-  gap: 0.3rem;
-  border: 1px solid ${({ theme }) => theme.lightGrayColor};
-  border-radius: ${({ theme }) => theme.borderRadiusSm};
-  font-weight: 400;
-`;
 
 type UserGoogleInfo = {
   sub: string;
@@ -101,14 +69,32 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
     }
   };
 
-  const signIn = async (data: LoginRequest) => {
-    const signInResponse = await login(data);
+  const signIn = async (loginRequest: LoginRequest) => {
+    const signInResponse: LoginResponse | ErrorResponse | undefined =
+      await login(loginRequest);
 
-    if (signInResponse) {
+    if (signInResponse && signInResponse.status === STATUS_CODE.OK) {
+      const data: LoginData = (signInResponse as LoginResponse).data;
       clearToken();
-      setAccessTokenCookie(signInResponse.access_token);
-      setRefreshTokenCookie(signInResponse.refresh_token);
+      setAccessTokenCookie(data.access_token);
+      setRefreshTokenCookie(data.refresh_token);
       await fetchCurrentUser();
+    }
+
+    return signInResponse;
+  };
+
+  const signInAndGoNextRoute = async (
+    requestSignIn: LoginRequest,
+    route: string
+  ) => {
+    const signInResponseAfterStore = await signIn(requestSignIn);
+
+    if (
+      signInResponseAfterStore &&
+      signInResponseAfterStore.status === STATUS_CODE.OK
+    ) {
+      router.push(route);
     }
   };
 
@@ -129,19 +115,15 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
       login_with: LOGIN_WITH.GOOGLE,
     };
 
-    if (userExitedResponse && userExitedResponse.status === STATUS.ERROR) {
-      switch (userExitedResponse.message) {
-        case USER_EXITED_MESSAGE.NOT_EXIT:
-          await storeGoogleUser(userInfo);
-          await signIn(requestSignIn);
-          router.push("/preference");
-          break;
-        case USER_EXITED_MESSAGE.EXITED:
-        default:
-          await signIn(requestSignIn);
-          router.push("/");
-          break;
-      }
+    if (
+      userExitedResponse &&
+      userExitedResponse.status === STATUS_CODE.UNAUTHORIZED
+    ) {
+      console.log("store and sign in");
+      await storeGoogleUser(userInfo);
+      await signInAndGoNextRoute(requestSignIn, "/preference");
+    } else {
+      await signInAndGoNextRoute(requestSignIn, "/");
     }
   };
 
@@ -149,28 +131,7 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
     console.error("Login Failed");
   };
 
-  useEffect(() => {
-    // const { google } = window;
-    // const { accounts } = google;
-    // const { id } = accounts;
-    // id.initialize({
-    //   client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
-    //   callback: handleCredentialResponse,
-    // });
-    // const signInButton = document.getElementById("div__sign-in");
-    // if (signInButton) {
-    //   signInButton.innerHTML = buttonText;
-    // }
-    // if (signInButton) {
-    //   (id as any).renderButton(signInButton, {
-    //     theme: "outline",
-    //     size: "medium",
-    //   });
-    // }
-  }, []);
-
   const googleLogin = useGoogleLogin({
-    // flow: "auth-code",
     onSuccess: handleCredentialResponse,
     onError: handleFailResponse,
   });
@@ -178,10 +139,6 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
   return (
     <>
       <GoogleLoginStyle>
-        {/* <GoogleLogin
-          onSuccess={handleCredentialResponse}
-          onError={handleFailResponse}
-        /> */}
         <GoogleLoginButton onClick={() => googleLogin()}>
           <Image
             src={`${SOCIAL_LOGO_PATH}/google.png`}
@@ -191,18 +148,7 @@ const GoogleSignIn = ({ buttonText, onResponse }: GoogleSignInProps) => {
           />
           {buttonText}
         </GoogleLoginButton>
-        {/* <GoogleLoginButton onClick={() => login()}>
-          <Image
-            src={`${SOCIAL_LOGO_PATH}/google.png`}
-            alt="Google logo"
-            width={LOGO_SIZE}
-            height={LOGO_SIZE}
-          />
-          Sign in with Google
-        </GoogleLoginButton> */}
       </GoogleLoginStyle>
-
-      {/* <div id="div__sign-in"></div> */}
     </>
   );
 };
