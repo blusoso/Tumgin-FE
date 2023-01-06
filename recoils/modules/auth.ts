@@ -1,9 +1,9 @@
 import { atom } from "recoil";
 import { KEYS } from "../keys";
-import { userResponse } from "services/auth/createUser";
+import { UserResponse } from "services/auth/createUser";
 
 type AuthState = {
-  user: userResponse | undefined;
+  user: UserResponse | undefined;
 };
 
 const authState = atom<AuthState>({

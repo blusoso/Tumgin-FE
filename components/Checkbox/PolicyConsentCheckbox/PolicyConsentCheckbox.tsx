@@ -7,6 +7,7 @@ type PolicyConsentCheckboxProps = {
   id?: string;
   name?: string;
   checked?: boolean;
+  isError?: boolean;
   onChange: (checked: any, name?: string) => void;
 };
 
@@ -14,17 +15,24 @@ const PolicyConsentCheckbox = ({
   id = "policy-consent",
   name = "is_consent",
   checked = true,
+  isError,
   onChange,
 }: PolicyConsentCheckboxProps) => {
   return (
     <>
-      <Checkbox id={id} name={name} checked={checked} onChange={onChange}>
+      <Checkbox
+        id={id}
+        name={name}
+        checked={checked}
+        isError={isError}
+        onChange={onChange}
+      >
         <div>
           ฉันอ่านและยอมรับ{" "}
           <Link
             href="/terms-of-service"
             target="_blank"
-            className="link--underline px-1"
+            className="link--underline"
           >
             เงื่อนไข
           </Link>{" "}
@@ -32,7 +40,7 @@ const PolicyConsentCheckbox = ({
           <Link
             href="/privacy-policy"
             target="_blank"
-            className="link--underline px-1"
+            className="link--underline"
           >
             นโยบายความเป็นส่วนตัว
           </Link>

@@ -1,50 +1,150 @@
-import { useEffect } from "react";
-import { getCookie, setCookie } from "cookies-next";
-import jwt from "jsonwebtoken";
-import { useRecoilState } from "recoil";
+import { useEffect, useState } from "react";
+import { getCookie } from "cookies-next";
 import Link from "next/link";
 
-import { authState } from "@/recoils/index";
-import { AUTH_MAX_AGE_SECONDS } from "@/utils/constant";
-
 import GoogleSignIn from "@/components/SignIn/Google";
-import SignInSignUpForm, {
-  FORM_TYPE,
-} from "@/components/SignIn/SignInSignUpForm";
+import { FORM_TYPE } from "@/components/SignIn/SignInSignUpForm";
 import FacebookSignIn from "@/components/SignIn/Facebook";
 import AuthLayout from "@/components/Layout/AuthLayout";
-import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
+import PolicyConsentCheckbox from "@/components/Checkbox/PolicyConsentCheckbox/PolicyConsentCheckbox";
+import { useRouter } from "next/router";
+import { useRecoilState } from "recoil";
+import { authState } from "@/recoils/index";
+import createUser, { LOGIN_WITH, UserCreate } from "@/services/auth/createUser";
+import getCurrentUser from "@/services/auth/getCurrentUser";
+import login, {
+  LoginData,
+  LoginRequest,
+  LoginResponse,
+} from "@/services/auth/login";
+import { ErrorResponse } from "@/services/type/globalServiceType";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 import {
-  isAccessTokenExpired,
-  refreshAccessToken,
-} from "@/utils/api/makeProtectedRequest";
-import { LOGIN_WITH } from "@/services/auth/createUser";
+  clearToken,
+  setAccessTokenCookie,
+  setRefreshTokenCookie,
+} from "@/utils/cookies";
+import axios from "axios";
+import checkUserExist from "@/services/auth/checkUserExist";
+import { ErrorMessageStyle } from "@/components/SignIn/SignInSignUpForm.styled";
+
+type UserGoogleInfo = {
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  given_name: string;
+  name: string;
+  picture: string;
+  locale: string;
+};
 
 type NewSessionProps = {
   userDataCookie: any;
 };
 
+const GOOGLE_USER_INFO_API = "https://www.googleapis.com/oauth2/v3/userinfo";
+
 const NewSession = ({ userDataCookie }: NewSessionProps) => {
-  console.log("isAccessTokenExpired", isAccessTokenExpired());
-
-  //TODO: if has a userData cookie -> 1. 1st time, redirect to preference/tutorial 2.redirect to home page/
+  const router = useRouter();
   const [auth, setAuth] = useRecoilState(authState);
+  const [isPolicyConsent, setIsPolicyConsent] = useState(true);
+  const [isPolicyConsentError, setIsPolicyConsentError] = useState("");
 
-  // useEffect(() => {
-  //   if (userDataCookie) {
-  //     setAuth({ ...auth, userData: userDataCookie });
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (isPolicyConsent && isPolicyConsentError) {
+      setIsPolicyConsentError("");
+    }
+  }, [isPolicyConsent]);
 
-  const handleToken = (token: string, type: LOGIN_WITH) => {
-    //TODO: make sure the password not to store in a cookie, store just a session token
-    // const userData = jwt.decode(token);
-    // console.log("userData", userData);
-    // setAuth({ ...auth, userData: userData });
-    // // Set the token in a cookie
-    // setCookie("userData", userData, {
-    //   maxAge: AUTH_MAX_AGE_SECONDS,
-    // });
+  const storeGoogleUser = async (user: UserGoogleInfo) => {
+    const request: UserCreate = {
+      username: user.name,
+      email: user.email,
+      profile_img: user.picture,
+      login_with: LOGIN_WITH.GOOGLE,
+      is_consent: true,
+    };
+
+    const createUserResponse = await createUser(request);
+
+    return createUserResponse;
+  };
+
+  const fetchCurrentUser = async () => {
+    const currentUserResponse = await getCurrentUser();
+    if (currentUserResponse) {
+      setAuth({ ...auth, user: currentUserResponse });
+    }
+  };
+
+  const signIn = async (loginRequest: LoginRequest) => {
+    const signInResponse: LoginResponse | ErrorResponse | undefined =
+      await login(loginRequest);
+
+    if (signInResponse && signInResponse.status === STATUS_CODE.OK) {
+      const data: LoginData = (signInResponse as LoginResponse).data;
+      clearToken();
+      setAccessTokenCookie(data.access_token);
+      setRefreshTokenCookie(data.refresh_token);
+      await fetchCurrentUser();
+    }
+
+    return signInResponse;
+  };
+
+  const signInAndGoNextRoute = async (
+    requestSignIn: LoginRequest,
+    route: string
+  ) => {
+    const signInResponseAfterStore = await signIn(requestSignIn);
+
+    if (
+      signInResponseAfterStore &&
+      signInResponseAfterStore.status === STATUS_CODE.OK
+    ) {
+      router.push(route);
+    }
+  };
+
+  const handleCredentialResponse = async (accessToken: any) => {
+    if (isPolicyConsent) {
+      setIsPolicyConsentError("");
+
+      const userInfoResponse = await axios.get(GOOGLE_USER_INFO_API, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const userInfo: UserGoogleInfo = userInfoResponse.data;
+
+      const userExitedResponse = await checkUserExist({
+        email: userInfo.email,
+      });
+      const requestSignIn = {
+        email: userInfo.email,
+        login_with: LOGIN_WITH.GOOGLE,
+      };
+
+      if (
+        userExitedResponse &&
+        userExitedResponse.status === STATUS_CODE.UNAUTHORIZED
+      ) {
+        console.log("store and sign in");
+        await storeGoogleUser(userInfo);
+        await signInAndGoNextRoute(requestSignIn, "/preference");
+      } else {
+        await signInAndGoNextRoute(requestSignIn, "/");
+      }
+    } else {
+      setIsPolicyConsentError(
+        "กรุณายอมรับเงื่อนไขและนโยบายความเป็นส่วนตัวเพื่อใช้บริการบนเว็บไซต์"
+      );
+    }
+  };
+
+  const handlePolicyConsent = (checked: boolean) => {
+    setIsPolicyConsent(checked);
   };
 
   const authLayoutProps = {
@@ -67,9 +167,19 @@ const NewSession = ({ userDataCookie }: NewSessionProps) => {
 
           <div className="my-5">
             <div className="mb-3">
+              <PolicyConsentCheckbox
+                id="policy-consent__login"
+                checked={isPolicyConsent}
+                onChange={handlePolicyConsent}
+              />
+              {isPolicyConsentError && (
+                <ErrorMessageStyle>{isPolicyConsentError}</ErrorMessageStyle>
+              )}
+            </div>
+            <div className="mb-3">
               <GoogleSignIn
                 buttonText="Sign in with Google"
-                onResponse={handleToken}
+                onResponse={handleCredentialResponse}
               />
             </div>
             {/* <FacebookSignIn buttonText="Facebook" onResponse={handleToken} /> */}

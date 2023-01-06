@@ -4,6 +4,7 @@ export type CheckboxProps = {
   id: string;
   name: string;
   checked?: boolean;
+  isError?: boolean;
   label?: string;
   children?: JSX.Element;
   register?: any;
@@ -14,6 +15,7 @@ const Checkbox = ({
   id,
   name,
   checked = false,
+  isError = false,
   label,
   children,
   onChange,
@@ -28,11 +30,17 @@ const Checkbox = ({
   };
 
   return (
-    <label className="flex items-center select-none cursor-pointer">
+    <label
+      className={`flex items-center select-none cursor-pointer ${
+        isError ? "text-red-500" : ""
+      }`}
+    >
       <input
         id={`checkbox__${id}`}
         type="checkbox"
-        className="w-4 h-4 border border-secondary mr-1"
+        className={`w-4 h-4 borde mr-1 ${
+          isError ? "border-secondary" : "border-red-500"
+        }`}
         name={name}
         checked={isChecked}
         onChange={handleChange}
