@@ -130,7 +130,6 @@ const NewSession = ({ userDataCookie }: NewSessionProps) => {
         userExitedResponse &&
         userExitedResponse.status === STATUS_CODE.UNAUTHORIZED
       ) {
-        console.log("store and sign in");
         await storeGoogleUser(userInfo);
         await signInAndGoNextRoute(requestSignIn, "/preference");
       } else {

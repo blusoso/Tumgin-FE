@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ErrorResponse } from "../type/globalServiceType";
+import { STATUS_CODE } from "../http/httpStatusCode";
 
 export enum LOGIN_WITH {
   SITE = "site",
@@ -38,21 +39,29 @@ export type UserResponse = {
   login_with?: LOGIN_WITH;
   created_at: Date;
   updated_at?: Date;
-} & BaseUser &
-  ErrorResponse;
+} & BaseUser;
+
+export type UserResponseWithStatus = {
+  status: number;
+  data: UserResponse;
+};
 
 const createUser = async (
   request: UserCreate
-): Promise<UserResponse | undefined> => {
+): Promise<UserResponseWithStatus | ErrorResponse | undefined> => {
   try {
     const result = await axios.post(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/auth/signup`,
       request
     );
 
-    return result.data;
-  } catch (error) {
-    console.error(error);
+    return { status: STATUS_CODE.OK, data: result.data };
+  } catch (error: any) {
+    return {
+      status: error.response.status,
+      statusText: error.response.statusText,
+      detail: error.response.data.detail,
+    };
   }
 };
 

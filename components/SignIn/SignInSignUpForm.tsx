@@ -7,7 +7,10 @@ import Button, { BUTTON_TYPE } from "../Button/Button";
 import EyeIcon from "../Icon/EyeIcon";
 import { ErrorMessageStyle } from "./SignInSignUpForm.styled";
 import PolicyConsentCheckbox from "../Checkbox/PolicyConsentCheckbox/PolicyConsentCheckbox";
-import createUser, { LOGIN_WITH } from "services/auth/createUser";
+import createUser, {
+  LOGIN_WITH,
+  UserResponseWithStatus,
+} from "services/auth/createUser";
 import login, {
   LoginData,
   LoginRequest,
@@ -103,6 +106,18 @@ const SignInSignUpForm = ({
     }
   }, [watch("email"), watch("password")]);
 
+  useEffect(() => {
+    if (type === FORM_TYPE.SIGN_UP && errorResponseMessage) {
+      clearErrorResponseMessage();
+    }
+  }, [
+    watch("email"),
+    watch("password"),
+    watch("confirm_password"),
+    watch("username"),
+    watch("gender"),
+  ]);
+
   const handleGender = (gender: GenderType) => {
     setSelectedGender(gender);
   };
@@ -196,9 +211,12 @@ const SignInSignUpForm = ({
       request.is_consent = validateConsent();
 
       if (request.gender && request.is_consent) {
-        const response = await createUser(request);
+        const signUpResponse:
+          | UserResponseWithStatus
+          | ErrorResponse
+          | undefined = await createUser(request);
 
-        if (response) {
+        if (signUpResponse && signUpResponse.status === STATUS_CODE.OK) {
           const loginRequest = {
             email: data.email,
             password: data.password,
@@ -206,6 +224,8 @@ const SignInSignUpForm = ({
 
           const signInResponse = await signIn(loginRequest);
           getSignInResponse(signInResponse, "/preference");
+        } else {
+          setErrorResponseMessage((signUpResponse as ErrorResponse).detail);
         }
       }
     } else if (type === FORM_TYPE.SIGN_IN) {
@@ -222,6 +242,11 @@ const SignInSignUpForm = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="mb-5">
+        {errorResponseMessage && (
+          <ErrorMessageStyle className="mb-3">
+            {errorResponseMessage}
+          </ErrorMessageStyle>
+        )}
         <div className="mb-3">
           <Input
             id="sign-in__email"
@@ -350,10 +375,6 @@ const SignInSignUpForm = ({
               </ErrorMessageStyle>
             )}
           </div>
-        )}
-
-        {errorResponseMessage && (
-          <ErrorMessageStyle>{errorResponseMessage}</ErrorMessageStyle>
         )}
       </div>
 
