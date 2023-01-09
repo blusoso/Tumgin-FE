@@ -1,3 +1,4 @@
+import { STATUS_CODE } from "./../../services/http/httpStatusCode";
 import axios from "axios";
 import { getCookie } from "cookies-next";
 import jwt from "jsonwebtoken";
@@ -61,7 +62,6 @@ const makeProtectedRequest = async (
     accessToken = await refreshAccessToken();
     if (accessToken) {
       setAccessTokenCookie(accessToken);
-      console.log("set new cookie");
     }
   } else {
     accessToken = getCookie(COOKIE_NAME.ACCESS_TOKEN);
@@ -77,7 +77,12 @@ const makeProtectedRequest = async (
       },
       data: data,
     });
-    return response.data;
+
+    if (response) {
+      return { status: STATUS_CODE.OK, data: response.data };
+    }
+
+    return { status: STATUS_CODE.NOT_FOUND, data: "" };
   } catch (error) {
     console.error(error);
     return null;

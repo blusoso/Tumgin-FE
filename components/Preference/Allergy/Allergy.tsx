@@ -6,47 +6,25 @@ import PreferenceTitle from "../PreferenceTitle/PreferenceTitle";
 import { AllergyCustomizeSection, AllergyList } from "./Allergy.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import { AllergyData } from "@/services/preference/getAllergy";
 
-type AllergyType = {
-  id: number;
-  emoji?: string;
-  name: string;
+type AllergyProps = {
+  allergyList?: AllergyData[];
+  selectedAllergyList: AllergyData[];
+  handleAllergyAdded: (customAllergyValue: AllergyData) => void;
+  handleSelectedAllergy: (selected: AllergyData) => void;
 };
 
-//TODO: id equal to ingredient or in ingredient table has a column is_allergy
-const ALLERGIES_LIST: AllergyType[] = [
-  { id: 1, emoji: "🥛", name: "นม" },
-  { id: 2, emoji: "🥚", name: "ไข่" },
-  { id: 3, emoji: "🐿️", name: "ถั่วเปลือกแข็ง" },
-  { id: 4, emoji: "🟡", name: "ถั่วเหลือง" },
-  { id: 5, emoji: "🥜", name: "ตระกูลถั่ว" },
-  { id: 6, emoji: "🦐", name: "กุ้ง/ล็อบสเตอร์" },
-  { id: 7, emoji: "🐟", name: "ปลา" },
-  { id: 8, emoji: "🌾", name: "ข้าว" },
-  { id: 9, emoji: "🌽", name: "ข้าวโพด" },
-  { id: 10, emoji: "🧅", name: "หัวหอม" },
-  { id: 11, emoji: "🧄", name: "กระเทียม" },
-];
-
-const Allergy = () => {
+const Allergy = ({
+  allergyList,
+  selectedAllergyList,
+  handleAllergyAdded,
+  handleSelectedAllergy,
+}: AllergyProps) => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
 
-  const [allergyList, setAllergyList] = useState<AllergyType[]>(ALLERGIES_LIST);
-  const [selectedAllergyList, setSelectedAllergyList] = useState<string[]>([]);
   const [customAllergyValue, setCustomAllergyValue] = useState<string>("");
-
-  const handleSelectedAllergy = (selected: AllergyType) => {
-    if (selectedAllergyList.includes(selected.name)) {
-      const updatedArray = selectedAllergyList.filter(
-        (allergyName: string) => allergyName !== selected.name
-      );
-
-      setSelectedAllergyList(updatedArray);
-    } else {
-      setSelectedAllergyList([...selectedAllergyList, selected.name]);
-    }
-  };
 
   const clearAllergyInputValue = () => {
     setCustomAllergyValue("");
@@ -55,12 +33,10 @@ const Allergy = () => {
   const addCustomAllergy = () => {
     if (customAllergyValue) {
       const addedAllergy = {
-        id: allergyList.length + 1,
         name: customAllergyValue,
       };
 
-      setAllergyList([...allergyList, addedAllergy]);
-      setSelectedAllergyList([...selectedAllergyList, customAllergyValue]);
+      handleAllergyAdded(addedAllergy);
     }
 
     clearAllergyInputValue();
@@ -79,24 +55,27 @@ const Allergy = () => {
       <AllergyList
         className={`flex flex-wrap ${isMobile || isTablet ? "" : "mb-4"}`}
       >
-        {allergyList.map((allergy, key) => (
-          <React.Fragment key={`allergy__${allergy.name}--${key}`}>
-            <Button
-              className="mr-2 mb-3"
-              padding="0.6rem 1.2rem"
-              type={
-                selectedAllergyList.includes(allergy.name)
-                  ? BUTTON_TYPE.PRIMARY
-                  : BUTTON_TYPE.SECONDARY_OUTLINE
-              }
-              onClick={() => handleSelectedAllergy(allergy)}
-            >
-              <span>
-                {allergy.emoji} {allergy.name}
-              </span>
-            </Button>
-          </React.Fragment>
-        ))}
+        {allergyList &&
+          allergyList.map((allergy, key) => (
+            <React.Fragment key={`allergy__${allergy.name}--${key}`}>
+              <Button
+                className="mr-2 mb-3"
+                padding="0.6rem 1.2rem"
+                type={
+                  selectedAllergyList.some(
+                    (selected) => selected.id === allergy.id
+                  )
+                    ? BUTTON_TYPE.PRIMARY
+                    : BUTTON_TYPE.SECONDARY_OUTLINE
+                }
+                onClick={() => handleSelectedAllergy(allergy)}
+              >
+                <span>
+                  {allergy.emoji} {allergy.name}
+                </span>
+              </Button>
+            </React.Fragment>
+          ))}
       </AllergyList>
 
       <AllergyCustomizeSection

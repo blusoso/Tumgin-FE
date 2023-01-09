@@ -164,8 +164,8 @@ const SignInSignUpForm = ({
 
   const fetchCurrentUser = async () => {
     const response = await getCurrentUser();
-    if (response) {
-      setAuth({ ...auth, user: response });
+    if (response && response.status === STATUS_CODE.OK) {
+      setAuth({ ...auth, user: response.data });
     }
   };
 

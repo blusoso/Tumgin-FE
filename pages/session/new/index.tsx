@@ -72,8 +72,8 @@ const NewSession = ({ userDataCookie }: NewSessionProps) => {
 
   const fetchCurrentUser = async () => {
     const currentUserResponse = await getCurrentUser();
-    if (currentUserResponse) {
-      setAuth({ ...auth, user: currentUserResponse });
+    if (currentUserResponse && currentUserResponse.status === STATUS_CODE.OK) {
+      setAuth({ ...auth, user: currentUserResponse.data });
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/router";
@@ -13,6 +13,28 @@ import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
 import { COOKIE_AGE, COOKIE_NAME } from "@/utils/cookies";
 import HomeNavbar from "@/components/Navbar/HomeNavbar/HomeNavbar";
+import getAllergy, {
+  AllergyData,
+  AllergyResponse,
+} from "@/services/preference/getAllergy";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
+import getDietType, {
+  DietTypeData,
+  DietTypeResponse,
+} from "@/services/preference/getDietType";
+import useCurrentUser from "@/utils/auth/useCurrentUser";
+import createUserDietType, {
+  UserDietTypeRequest,
+} from "@/services/preference/createUserDietType";
+import getOwnDietType, {
+  OwnDietTypeResponse,
+} from "@/services/preference/getOwnDietType";
+import createUserAllergy, {
+  UserAllergyRequest,
+} from "@/services/preference/createUserAllergy";
+import getOwnAllergy, {
+  OwnAllergyResponse,
+} from "@/services/preference/getOwnAllergy";
 
 type ButtonWrapperProps = {
   isDesktop?: boolean;
@@ -33,20 +55,121 @@ const ButtonWrapper = styled.div<ButtonWrapperProps>`
 const TOTAL_STEP = 2;
 const LAST_STEP = TOTAL_STEP;
 
-const Preference = () => {
+type PreferenceProps = {
+  allergyData: AllergyData[];
+  dietTypeData: DietTypeData[];
+};
+
+const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+  const { user } = useCurrentUser();
   const router = useRouter();
 
   const [step, setStep] = useState(1);
   const [isDone, setIsDone] = useState(false);
 
+  const [newAllergyList, setNewAllergyList] =
+    useState<AllergyData[] | undefined>(allergyData);
+  const [selectedAllergyList, setSelectedAllergyList] = useState<AllergyData[]>(
+    []
+  );
+
+  const [selectedDietList, setSelectedDietList] = useState<DietTypeData[]>([]);
+
+  const fetchDefaultAllergy = async (userId: number) => {
+    const defaultAllergyResponse: OwnAllergyResponse | null | undefined =
+      await getOwnAllergy(userId);
+
+    if (
+      defaultAllergyResponse &&
+      defaultAllergyResponse.status === STATUS_CODE.OK
+    ) {
+      const defaultAllergy = defaultAllergyResponse.data.map(
+        (data) => data.ingredient
+      );
+
+      setSelectedAllergyList(defaultAllergy);
+    }
+  };
+
+  const fetchDefaultDietType = async (userId: number) => {
+    const defaultDietTypeResponse: OwnDietTypeResponse | null | undefined =
+      await getOwnDietType(userId);
+
+    if (
+      defaultDietTypeResponse &&
+      defaultDietTypeResponse.status === STATUS_CODE.OK
+    ) {
+      const defaultDietType = defaultDietTypeResponse.data.map(
+        (data) => data.diet_type
+      );
+
+      setSelectedDietList(defaultDietType);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDefaultAllergy(user.id);
+      fetchDefaultDietType(user.id);
+    }
+  }, [user]);
+
+  const handleAllergyAdded = (addedAllergy: AllergyData) => {
+    setNewAllergyList([...(newAllergyList as AllergyData[]), addedAllergy]);
+    setSelectedAllergyList([...selectedAllergyList, addedAllergy]);
+  };
+
+  const handleSelectedAllergy = (selected: AllergyData) => {
+    const hasSelected = selectedAllergyList.some(
+      (allergy) => allergy.id === selected.id
+    );
+
+    if (hasSelected) {
+      const updatedArray = selectedAllergyList.filter(
+        (allergy: AllergyData) => allergy.id !== selected.id
+      );
+      setSelectedAllergyList(updatedArray);
+    } else {
+      setSelectedAllergyList([...selectedAllergyList, selected]);
+    }
+  };
+
+  const handleSelectedDiet = (selected: DietTypeData) => {
+    const hasSelected = selectedDietList.some(
+      (diet) => diet.id === selected.id
+    );
+
+    if (hasSelected) {
+      const updatedArray = selectedDietList.filter(
+        (diet: DietTypeData) => diet.id !== selected.id
+      );
+      setSelectedDietList(updatedArray);
+    } else {
+      setSelectedDietList([...selectedDietList, selected]);
+    }
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <Allergy />;
+        return (
+          <Allergy
+            allergyList={newAllergyList}
+            selectedAllergyList={selectedAllergyList}
+            handleAllergyAdded={handleAllergyAdded}
+            handleSelectedAllergy={handleSelectedAllergy}
+          />
+        );
       case LAST_STEP:
-        return <PreferenceDiet />;
+        return (
+          <PreferenceDiet
+            dietTypeList={dietTypeData}
+            selectedDietList={selectedDietList}
+            handleSelectedDiet={handleSelectedDiet}
+          />
+        );
       default:
         break;
     }
@@ -54,6 +177,31 @@ const Preference = () => {
 
   const onBack = () => {
     setStep(step - 1);
+  };
+
+  const storeUserDietType = async () => {
+    if (user && selectedDietList && selectedDietList.length > 0) {
+      selectedDietList.forEach(async (selectedDiet) => {
+        const userDietTypeRequest: UserDietTypeRequest = {
+          user_id: user.id,
+          diet_type_id: selectedDiet.id,
+        };
+
+        await createUserDietType(userDietTypeRequest);
+      });
+    }
+  };
+
+  const storeUserAllergy = async () => {
+    if (user && selectedAllergyList && selectedAllergyList.length > 0) {
+      selectedAllergyList.forEach(async (selectedAllergy) => {
+        const userAllergyRequest: UserAllergyRequest = {
+          user_id: user.id,
+          ingredient_id: selectedAllergy.id,
+        };
+        await createUserAllergy(userAllergyRequest);
+      });
+    }
   };
 
   const onNext = () => {
@@ -66,7 +214,10 @@ const Preference = () => {
         maxAge: COOKIE_AGE.SET_USER_PREFERENCE,
       });
 
-      router.back();
+      // router.back();
+
+      storeUserDietType();
+      storeUserAllergy();
     }
   };
 
@@ -124,3 +275,26 @@ const Preference = () => {
 };
 
 export default Preference;
+
+export async function getServerSideProps() {
+  const allergyResponse = await getAllergy();
+  const dietTypeResponse = await getDietType();
+
+  let allergyData: AllergyData[] | null = null;
+  let dietTypeData: DietTypeData[] | null = null;
+
+  if (allergyResponse && allergyResponse.status === STATUS_CODE.OK) {
+    allergyData = (allergyResponse as AllergyResponse).data;
+  }
+
+  if (dietTypeResponse && dietTypeResponse.status === STATUS_CODE.OK) {
+    dietTypeData = (dietTypeResponse as DietTypeResponse).data;
+  }
+
+  return {
+    props: {
+      allergyData,
+      dietTypeData,
+    },
+  };
+}

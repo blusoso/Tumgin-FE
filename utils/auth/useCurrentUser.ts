@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import getCurrentUser from "services/auth/getCurrentUser";
 import { COOKIE_NAME } from "../cookies";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 
 const useCurrentUser = () => {
   const [auth, setAuth] = useRecoilState(authState);
 
   const fetchCurrentUser = async () => {
     const response = await getCurrentUser();
-    if (response) {
-      setAuth({ ...auth, user: response });
+    if (response && response.status === STATUS_CODE.OK) {
+      setAuth({ ...auth, user: response.data });
     }
   };
 

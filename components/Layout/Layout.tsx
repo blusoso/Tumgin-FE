@@ -10,6 +10,7 @@ import { authState } from "@/recoils/index";
 import getCurrentUser from "@/services/auth/getCurrentUser";
 import { getCookie } from "cookies-next";
 import { COOKIE_NAME } from "@/utils/cookies";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 
 export const Main = styled.main``;
 
@@ -77,8 +78,8 @@ const Layout = ({ children }: LayoutProps) => {
 
   const fetchCurrentUser = async () => {
     const response = await getCurrentUser();
-    if (response) {
-      setAuth({ ...auth, user: response });
+    if (response && response.status === STATUS_CODE.OK) {
+      setAuth({ ...auth, user: response.data });
     }
   };
 

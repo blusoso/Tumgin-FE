@@ -1,39 +1,19 @@
 import React, { useState } from "react";
 import PreferenceTitle from "../PreferenceTitle/PreferenceTitle";
 import Button, { BUTTON_TYPE } from "@/components/Button/Button";
+import { DietTypeData } from "@/services/preference/getDietType";
 
-type DietType = {
-  emoji?: string;
-  name: string;
+type PreferenceDietProps = {
+  dietTypeList: DietTypeData[];
+  selectedDietList: DietTypeData[];
+  handleSelectedDiet: (selected: DietTypeData) => void;
 };
 
-const DIET_LIST: DietType[] = [
-  { emoji: "🍞", name: "Low-carb" },
-  { emoji: "🥩", name: "Low-fat" },
-  { emoji: "🍄", name: "Low-calorie" },
-  { emoji: "🍝", name: "Balanced diet" },
-  { emoji: "🥖", name: "Gluten free" },
-  { emoji: "🥗", name: "วีแกน" },
-  { emoji: "🍖", name: "คีโต" },
-  { emoji: "🌊", name: "เมดิเตอร์เรเนียน" },
-];
-
-const PreferenceDiet = () => {
-  const [dietList, setDietList] = useState<DietType[]>(DIET_LIST);
-  const [selectedDiet, setSelectedDiet] = useState<string[]>([]);
-
-  const handleSelectedDiet = (selected: DietType) => {
-    if (selectedDiet.includes(selected.name)) {
-      const updatedArray = selectedDiet.filter(
-        (allergyName: string) => allergyName !== selected.name
-      );
-
-      setSelectedDiet(updatedArray);
-    } else {
-      setSelectedDiet([...selectedDiet, selected.name]);
-    }
-  };
-
+const PreferenceDiet = ({
+  dietTypeList,
+  selectedDietList,
+  handleSelectedDiet,
+}: PreferenceDietProps) => {
   return (
     <div>
       <PreferenceTitle
@@ -42,13 +22,13 @@ const PreferenceDiet = () => {
       />
 
       <div className="flex flex-wrap">
-        {dietList.map((diet, key) => (
+        {dietTypeList.map((diet, key) => (
           <React.Fragment key={`diet__${diet.name}--${key}`}>
             <Button
               className="mr-2 mb-3"
               padding="0.6rem 1.2rem"
               type={
-                selectedDiet.includes(diet.name)
+                selectedDietList.some((selected) => selected.id === diet.id)
                   ? BUTTON_TYPE.PRIMARY
                   : BUTTON_TYPE.SECONDARY_OUTLINE
               }

@@ -57,11 +57,7 @@ const createUser = async (
 
     return { status: STATUS_CODE.OK, data: result.data };
   } catch (error: any) {
-    return {
-      status: error.response.status,
-      statusText: error.response.statusText,
-      detail: error.response.data.detail,
-    };
+    console.log(error);
   }
 };
 
