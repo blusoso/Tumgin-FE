@@ -35,6 +35,12 @@ import createUserAllergy, {
 import getOwnAllergy, {
   OwnAllergyResponse,
 } from "@/services/preference/getOwnAllergy";
+import createIngredient, {
+  IngredientResponse,
+} from "@/services/auth/ingredient/createIngredient";
+import { ErrorResponse } from "@/services/type/globalServiceType";
+import { UserResponse } from "@/services/auth/createUser";
+import deleteUserAllergy from "@/services/preference/deleteUserAllergy";
 
 type ButtonWrapperProps = {
   isDesktop?: boolean;
@@ -74,8 +80,10 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
   const [selectedAllergyList, setSelectedAllergyList] = useState<AllergyData[]>(
     []
   );
+  const [defaultAllergy, setDefaultAllergy] = useState<AllergyData[]>([]);
 
   const [selectedDietList, setSelectedDietList] = useState<DietTypeData[]>([]);
+  const [defaultDietType, setDefaultDietType] = useState<DietTypeData[]>([]);
 
   const fetchDefaultAllergy = async (userId: number) => {
     const defaultAllergyResponse: OwnAllergyResponse | null | undefined =
@@ -90,6 +98,7 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
       );
 
       setSelectedAllergyList(defaultAllergy);
+      setDefaultAllergy(defaultAllergy);
     }
   };
 
@@ -106,6 +115,7 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
       );
 
       setSelectedDietList(defaultDietType);
+      setDefaultDietType(defaultDietType);
     }
   };
 
@@ -123,12 +133,12 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
 
   const handleSelectedAllergy = (selected: AllergyData) => {
     const hasSelected = selectedAllergyList.some(
-      (allergy) => allergy.id === selected.id
+      (allergy) => allergy.name === selected.name
     );
 
     if (hasSelected) {
       const updatedArray = selectedAllergyList.filter(
-        (allergy: AllergyData) => allergy.id !== selected.id
+        (allergy: AllergyData) => allergy.name !== selected.name
       );
       setSelectedAllergyList(updatedArray);
     } else {
@@ -179,7 +189,7 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
     setStep(step - 1);
   };
 
-  const storeUserDietType = async () => {
+  const submitUserDietType = async () => {
     if (user && selectedDietList && selectedDietList.length > 0) {
       selectedDietList.forEach(async (selectedDiet) => {
         const userDietTypeRequest: UserDietTypeRequest = {
@@ -192,19 +202,68 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
     }
   };
 
+  const createIngredientAndGetId = async (ingredientName: string) => {
+    const ingredientAddedRequest = {
+      name: ingredientName,
+    };
+
+    const ingredientAddedResponse: IngredientResponse | ErrorResponse | null =
+      await createIngredient(ingredientAddedRequest);
+
+    if (
+      ingredientAddedResponse &&
+      ingredientAddedResponse.status === STATUS_CODE.OK
+    ) {
+      return (ingredientAddedResponse as IngredientResponse).data.id;
+    }
+
+    return console.error(ingredientAddedResponse);
+  };
+
   const storeUserAllergy = async () => {
-    if (user && selectedAllergyList && selectedAllergyList.length > 0) {
-      selectedAllergyList.forEach(async (selectedAllergy) => {
-        const userAllergyRequest: UserAllergyRequest = {
-          user_id: user.id,
-          ingredient_id: selectedAllergy.id,
-        };
-        await createUserAllergy(userAllergyRequest);
+    selectedAllergyList.forEach(async (selectedAllergy) => {
+      let ingredientAddedId: any;
+
+      if (!selectedAllergy.id) {
+        ingredientAddedId = await createIngredientAndGetId(
+          selectedAllergy.name
+        );
+      } else {
+        ingredientAddedId = selectedAllergy.id;
+      }
+
+      const userAllergyRequest: UserAllergyRequest = {
+        user_id: (user as UserResponse).id,
+        ingredient_id: ingredientAddedId,
+      };
+
+      await createUserAllergy(userAllergyRequest);
+    });
+  };
+
+  const removeUserAllergy = async () => {
+    const deletedAllergyList = defaultAllergy.filter(
+      (d) => !selectedAllergyList.includes(d)
+    );
+
+    if (deletedAllergyList.length > 0) {
+      deletedAllergyList.forEach(async (deletedAllergy) => {
+        if (deletedAllergy.id) {
+          const res = await deleteUserAllergy({ id: deletedAllergy.id });
+          console.log(res);
+        }
       });
     }
   };
 
-  const onNext = () => {
+  const submitUserAllergy = async () => {
+    if (user && selectedAllergyList && selectedAllergyList.length > 0) {
+      // await storeUserAllergy();
+      await removeUserAllergy();
+    }
+  };
+
+  const onNext = async () => {
     if (step != LAST_STEP) {
       setStep(step + 1);
       setIsDone(false);
@@ -216,8 +275,8 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
 
       // router.back();
 
-      storeUserDietType();
-      storeUserAllergy();
+      await submitUserAllergy();
+      // await submitUserDietType();
     }
   };
 

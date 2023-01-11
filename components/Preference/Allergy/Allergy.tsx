@@ -63,7 +63,7 @@ const Allergy = ({
                 padding="0.6rem 1.2rem"
                 type={
                   selectedAllergyList.some(
-                    (selected) => selected.id === allergy.id
+                    (selected) => selected.name === allergy.name
                   )
                     ? BUTTON_TYPE.PRIMARY
                     : BUTTON_TYPE.SECONDARY_OUTLINE
