@@ -24,6 +24,7 @@ import getDietType, {
 } from "@/services/preference/getDietType";
 import useCurrentUser from "@/utils/auth/useCurrentUser";
 import createUserDietType, {
+  UserDietTypeData,
   UserDietTypeRequest,
 } from "@/services/preference/createUserDietType";
 import getOwnDietType, {
@@ -43,6 +44,7 @@ import createIngredient, {
 import { ErrorResponse } from "@/services/type/globalServiceType";
 import { UserResponse } from "@/services/auth/createUser";
 import deleteUserAllergy from "@/services/preference/deleteUserAllergy";
+import deleteUserDietType from "@/services/preference/deleteUserDietType";
 
 type ButtonWrapperProps = {
   isDesktop?: boolean;
@@ -87,6 +89,7 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
 
   const [selectedDietList, setSelectedDietList] = useState<DietTypeData[]>([]);
   const [defaultDietType, setDefaultDietType] = useState<DietTypeData[]>([]);
+  const [userDietType, setUserDietType] = useState<UserDietTypeData[]>([]);
 
   const fetchDefaultAllergy = async (userId: number) => {
     const defaultAllergyResponse: OwnAllergyResponse | null | undefined =
@@ -127,6 +130,8 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
       const defaultDietType = defaultDietTypeResponse.data.map(
         (data) => data.diet_type
       );
+
+      setUserDietType(defaultDietTypeResponse.data);
 
       setSelectedDietList(defaultDietType);
       setDefaultDietType(defaultDietType);
@@ -203,16 +208,41 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
     setStep(step - 1);
   };
 
+  const storeUserDietType = async () => {
+    selectedDietList.forEach(async (selectedDiet) => {
+      const userDietTypeRequest: UserDietTypeRequest = {
+        user_id: (user as UserResponse).id,
+        diet_type_id: selectedDiet.id,
+      };
+
+      await createUserDietType(userDietTypeRequest);
+    });
+  };
+
+  const removeUserDietType = async () => {
+    const deletedDietTypeList = defaultDietType.filter(
+      (d) => !selectedDietList.includes(d)
+    );
+
+    if (deletedDietTypeList.length > 0) {
+      deletedDietTypeList.forEach(async (deletedDietType) => {
+        if (deletedDietType.id) {
+          const userDietTypeDeleted = userDietType.find(
+            (ud) => ud.diet_type.id === deletedDietType.id
+          );
+
+          if (userDietTypeDeleted) {
+            await deleteUserDietType({ id: userDietTypeDeleted.id });
+          }
+        }
+      });
+    }
+  };
+
   const submitUserDietType = async () => {
     if (user && selectedDietList && selectedDietList.length > 0) {
-      selectedDietList.forEach(async (selectedDiet) => {
-        const userDietTypeRequest: UserDietTypeRequest = {
-          user_id: user.id,
-          diet_type_id: selectedDiet.id,
-        };
-
-        await createUserDietType(userDietTypeRequest);
-      });
+      await storeUserDietType();
+      await removeUserDietType();
     }
   };
 
@@ -295,7 +325,7 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
       await submitUserAllergy();
       await submitUserDietType();
 
-      // router.back();
+      router.back();
     }
   };
 
