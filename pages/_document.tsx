@@ -21,12 +21,6 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <title>{APP_NAME}</title>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1"
-          />
-
           <script
             src="https://apis.google.com/js/platform.js?onload=init"
             async

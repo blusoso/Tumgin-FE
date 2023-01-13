@@ -11,6 +11,8 @@ import getCurrentUser from "@/services/auth/getCurrentUser";
 import { getCookie } from "cookies-next";
 import { COOKIE_NAME } from "@/utils/cookies";
 import { STATUS_CODE } from "@/services/http/httpStatusCode";
+import Head from "next/head";
+import { APP_NAME } from "@/utils/constant";
 
 export const Main = styled.main``;
 
@@ -91,6 +93,14 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <>
+      <Head>
+        <title>{APP_NAME}</title>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1"
+        />
+      </Head>
+
       <Main
         className={`container relative mx-auto ${
           isMobile || isTablet ? "my-4" : "mt-1 mb-6"

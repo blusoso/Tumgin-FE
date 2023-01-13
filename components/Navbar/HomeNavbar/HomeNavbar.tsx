@@ -53,6 +53,11 @@ export enum PROFILE_SETTING_ID {
 }
 
 const PROFILE_SETTING_LIST = [
+  {
+    id: "setting",
+    name: "ตั้งค่า",
+    icon: "settings-outline",
+  },
   { id: "logout", name: "ออกจากระบบ", icon: "log-out-outline" },
 ];
 

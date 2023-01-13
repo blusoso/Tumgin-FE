@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import { getCookie } from "cookies-next";
 import { COOKIE_NAME } from "@/utils/cookies";
 import { useRecoilState } from "recoil";
-import { authState } from "../recoils";
+import { authState } from "@/recoils/index";
 
 const TAB_MENU_LIST = [
   {

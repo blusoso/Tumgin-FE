@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { setCookie } from "cookies-next";
+import { getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/router";
 
 import Allergy from "@/components/Preference/Allergy/Allergy";
@@ -384,9 +384,15 @@ const Preference = ({ allergyData, dietTypeData }: PreferenceProps) => {
 
 export default Preference;
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ req, res }: any) {
   const allergyResponse = await getAllergy();
   const dietTypeResponse = await getDietType();
+  const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN, { req, res });
+
+  if (!accessToken) {
+    res.writeHead(302, { Location: "/" });
+    res.end();
+  }
 
   let allergyData: AllergyData[] | null = null;
   let dietTypeData: DietTypeData[] | null = null;
