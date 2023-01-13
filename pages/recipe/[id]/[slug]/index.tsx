@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { APP_NAME, IMAGE_PATH } from "@/utils/constant";
 import BaseNavbar from "@/components/Navbar/BaseNavbar/BaseNavbar";
 import BaseAvatar from "@/components/Avatar/BaseAvatar/BaseAvatar";
@@ -17,11 +17,17 @@ import RecipeFeedback from "@/components/RecipeDetail/RecipeFeedback/RecipeFeedb
 import RecipeFeedbackList from "@/components/RecipeDetail/RecipeFeedbackList/RecipeFeedbackList";
 import TopicHeader from "@/components/TopicHeader/TopicHeader";
 import RecipeCardList from "@/components/RecipeCardList/RecipeCardList";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import HomeNavbar from "@/components/Navbar/HomeNavbar/HomeNavbar";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
 import { BackgroundFadeToTop, HideScrollBar } from "@/components/Mixin/Mixin";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
+import getRecipe, {
+  RecipeData,
+  RecipeResponse,
+} from "@/services/recipe/getRecipe";
+import { DEFAULT_THUMBNAIL_IMG } from "@/components/Card/RecipeCard";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -203,6 +209,11 @@ const RecipeDetail = () => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
 
+  const router = useRouter();
+  const { id } = router.query;
+
+  const [recipe, setRecipe] = useState<RecipeData | undefined>();
+
   let marginBetweenSection: string = "";
 
   if (isMobile) {
@@ -211,10 +222,28 @@ const RecipeDetail = () => {
     marginBetweenSection = "my-6";
   }
 
+  const fetchRecipe = async () => {
+    if (id && typeof id === "string") {
+      const recipeResponse: RecipeResponse | null | undefined = await getRecipe(
+        {
+          id: parseInt(id),
+        }
+      );
+
+      if (recipeResponse && recipeResponse.status === STATUS_CODE.OK) {
+        setRecipe(recipeResponse.data);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchRecipe();
+  }, [id]);
+
   const recipeAuthor = (
     <div className="ml-2">
       <BaseAvatar
-        img={AUTHOR.img}
+        img={recipe?.profile_img || DEFAULT_THUMBNAIL_IMG}
         size="36px"
         borderRadius={themeContext.borderRadiusSm}
       />
@@ -234,7 +263,7 @@ const RecipeDetail = () => {
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <BaseNavbar left={recipeAuthor} isBack />
-        <h3>{AUTHOR.name}</h3>
+        <h3>{recipe?.username}</h3>
       </div>
       <div className="flex items-center gap-3">
         {isMobile && <RecipeReactionButton isLiked={false} />}
@@ -245,37 +274,42 @@ const RecipeDetail = () => {
   return (
     <div className="relative">
       <HomeNavbar />
-      <div className={`relative ${isTablet ? "px-20" : !isMobile && "px-72"}`}>
-        <RecipeReactionFixed>
-          {!isMobile && <RecipeReactionButton isLiked={false} />}
-        </RecipeReactionFixed>
 
-        {renderRecipeDetailHeader}
+      {recipe && (
+        <div
+          className={`relative ${isTablet ? "px-20" : !isMobile && "px-72"}`}
+        >
+          <RecipeReactionFixed>
+            {!isMobile && <RecipeReactionButton isLiked={false} />}
+          </RecipeReactionFixed>
 
-        <RecipeInfo recipe={RECIPE_DETAIL} />
+          {renderRecipeDetailHeader}
 
-        <div className={marginBetweenSection}>
-          <ReadMore>{RECIPE_DETAIL.description}</ReadMore>
+          <RecipeInfo recipe={recipe} />
+
+          <div className={marginBetweenSection}>
+            <ReadMore>{recipe.description}</ReadMore>
+          </div>
+
+          <div className={marginBetweenSection}>
+            <Ingredient ingredientList={RECIPE_DETAIL.ingredients} />
+          </div>
+
+          <div className={marginBetweenSection}>
+            <DirectionList directionList={RECIPE_DETAIL.directions} />
+          </div>
+
+          <div className={marginBetweenSection}>
+            <RecipeComment commentList={RECIPE_DETAIL.comments} />
+          </div>
+
+          <HorizonLine />
+
+          <div className={marginBetweenSection}>
+            <RecipeFeedbackList commentList={RECIPE_DETAIL.comments} />
+          </div>
         </div>
-
-        <div className={marginBetweenSection}>
-          <Ingredient ingredientList={RECIPE_DETAIL.ingredients} />
-        </div>
-
-        <div className={marginBetweenSection}>
-          <DirectionList directionList={RECIPE_DETAIL.directions} />
-        </div>
-
-        <div className={marginBetweenSection}>
-          <RecipeComment commentList={RECIPE_DETAIL.comments} />
-        </div>
-
-        <HorizonLine />
-
-        <div className={marginBetweenSection}>
-          <RecipeFeedbackList commentList={RECIPE_DETAIL.comments} />
-        </div>
-      </div>
+      )}
 
       <div className={`mb-12 ${!isMobile ? "px-10" : ""}`}>
         <HorizonLine />

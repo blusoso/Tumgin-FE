@@ -1,13 +1,18 @@
 import React from "react";
-import { CreatedAtLabel } from "@/components/Card/RecipeCard.styled";
-import { DifficultLevelLabel, NutritionCard } from "./RecipeInfo.styled";
+import moment from "moment";
+
+import { RecipeData } from "@/services/recipe/getRecipe";
+import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
+
 import { DIFFICULT_LEVEL } from "@/pages/recipe/[id]/[slug]";
 import RecipeImagePreview from "../RecipeImagePreview/RecipeImagePreview";
 import RecipeInfoList from "../RecipeInfoList/RecipeInfoList";
-import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
+
+import { CreatedAtLabel } from "@/components/Card/RecipeCard.styled";
+import { DifficultLevelLabel, NutritionCard } from "./RecipeInfo.styled";
 
 type RecipeInfoProps = {
-  recipe: any;
+  recipe: RecipeData;
 };
 
 const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
@@ -16,31 +21,31 @@ const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
   const nutritionList = [
     {
       name: "🥩 โปรตีน",
-      value: recipe.protein,
+      value: recipe.protein_gram,
       percent: recipe.protein_percent,
     },
     {
       name: "🧀 ไขมัน",
-      value: recipe.fat,
+      value: recipe.fat_gram,
       percent: recipe.fat_percent,
     },
     {
       name: "🍙 คาร์บ",
-      value: recipe.carb,
+      value: recipe.carb_gram,
       percent: recipe.carb_percent,
     },
   ];
 
-  const renderDifficultLevelLabel = (difficultLevel: string) => {
+  const renderDifficultLevelLabel = (difficultLevel: number) => {
     switch (difficultLevel) {
-      case DIFFICULT_LEVEL.EASY:
+      case 1:
         return "🥰 ง่าย";
-      case DIFFICULT_LEVEL.MID:
+      case 2:
         return "😊 ปานกลาง";
-      case DIFFICULT_LEVEL.HIGH:
+      case 3:
         return "😏 ยาก";
       default:
-        return;
+        return "😏 ปานกลาง";
     }
   };
 
@@ -68,14 +73,18 @@ const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
     );
   };
 
+  console.log(typeof recipe.difficult_level);
+
   return (
     <div className="mt-2">
       <div className="text-center">
-        <CreatedAtLabel>{recipe.created_at}</CreatedAtLabel>
+        <CreatedAtLabel>{moment(recipe.created_at).fromNow()}</CreatedAtLabel>
         <h2 className="mt-1">{recipe.name}</h2>
-        <DifficultLevelLabel>
-          {renderDifficultLevelLabel(recipe.difficult_level)}
-        </DifficultLevelLabel>
+        {recipe.difficult_level && (
+          <DifficultLevelLabel>
+            {renderDifficultLevelLabel(recipe.difficult_level)}
+          </DifficultLevelLabel>
+        )}
       </div>
       <div className="my-3">
         <RecipeImagePreview
@@ -85,9 +94,11 @@ const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
       </div>
       <div className="flex justify-between">
         <p className="text-secondary">123 คนเคยลองสูตรนี้</p>
-        <p className="font-normal">⭐ {recipe.rating_avg}</p>
+        {/* <p className="font-normal">⭐ {recipe.rating_avg}</p> */}
       </div>
+
       <RecipeInfoList recipe={recipe} />
+
       <div className="grid gap-2 grid-cols-3 my-3">
         {nutritionList.map((nutrition, index) => (
           <div key={`nutrition--${index}`}>{renderNutrition(nutrition)}</div>

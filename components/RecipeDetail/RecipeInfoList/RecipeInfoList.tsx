@@ -1,13 +1,15 @@
 import React from "react";
+import { RecipeData } from "@/services/recipe/getRecipe";
+import { formatTime } from "@/utils/time";
 
 type RecipeInfoListProps = {
-  recipe: any;
+  recipe: RecipeData;
 };
 
 const RecipeInfoList = ({ recipe }: RecipeInfoListProps) => {
   const recipeInfoList = [
-    { emoji: "🔥", value: recipe.cal, unit: "Kcal" },
-    { emoji: "🕒", value: recipe.time, unit: "น." },
+    { emoji: "🔥", value: recipe.calory, unit: "Kcal" },
+    { emoji: "🕒", value: formatTime(recipe.minute || 0) },
     { emoji: "🥣", value: recipe.serving, unit: "ที่" },
   ];
 

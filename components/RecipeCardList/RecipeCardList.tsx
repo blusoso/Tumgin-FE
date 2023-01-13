@@ -1,5 +1,5 @@
 import { APP_NAME, IMAGE_PATH } from "@/utils/constant";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import RecipeCard from "../Card/RecipeCard";
 import {
   RecipeCardListContainer,
@@ -7,85 +7,14 @@ import {
 } from "./RecipeCarfList.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import getRecipe, {
+  RecipeListData,
+  RecipeListResponse,
+} from "@/services/recipe/getRecipeList";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
-
-const AUTHOR = { img: avatarImg, name: APP_NAME };
-const RECIPE_LIST = [
-  {
-    id: 1,
-    thumbnail: recipeImg,
-    name: "ข้าวไข่ข้นลูกชิ้นอกไก่",
-    name_en: "Scramble Egg Rice Chicken",
-    slug: "scramble-egg-rice-chicken",
-    cal: 365,
-    time: 30,
-    serving: 1,
-    isStaffPick: true,
-    created_at: "1 วันที่แล้ว",
-  },
-  {
-    id: 2,
-    thumbnail: recipeImg,
-    name: "ข้าวไข่ข้นลูกชิ้นอกไก่",
-    name_en: "Scramble Egg Rice Chicken",
-    slug: "scramble-egg-rice-chicken",
-    cal: 365,
-    time: 30,
-    serving: 1,
-    isStaffPick: true,
-    created_at: "1 วันที่แล้ว",
-  },
-  {
-    id: 3,
-    thumbnail: recipeImg,
-    name: "ข้าวไข่ข้นลูกชิ้นอกไก่",
-    name_en: "Scramble Egg Rice Chicken",
-    slug: "scramble-egg-rice-chicken",
-    cal: 365,
-    time: 30,
-    serving: 1,
-    isStaffPick: true,
-    created_at: "1 วันที่แล้ว",
-  },
-  {
-    id: 4,
-    thumbnail: recipeImg,
-    name: "ข้าวไข่ข้นลูกชิ้นอกไก่",
-    name_en: "Scramble Egg Rice Chicken",
-    slug: "scramble-egg-rice-chicken",
-    cal: 365,
-    time: 30,
-    serving: 1,
-    isStaffPick: true,
-    created_at: "1 วันที่แล้ว",
-  },
-  {
-    id: 5,
-    thumbnail: recipeImg,
-    name: "ข้าวไข่ข้นลูกชิ้นอกไก่",
-    name_en: "Scramble Egg Rice Chicken",
-    slug: "scramble-egg-rice-chicken",
-    cal: 365,
-    time: 30,
-    serving: 1,
-    isStaffPick: true,
-    created_at: "1 วันที่แล้ว",
-  },
-  {
-    id: 6,
-    thumbnail: recipeImg,
-    name: "ข้าวไข่ข้นลูกชิ้นอกไก่",
-    name_en: "Scramble Egg Rice Chicken",
-    slug: "scramble-egg-rice-chicken",
-    cal: 365,
-    time: 30,
-    serving: 1,
-    isStaffPick: true,
-    created_at: "1 วันที่แล้ว",
-  },
-];
 
 type RecipeCardListProps = {
   scrollable?: boolean;
@@ -93,6 +22,7 @@ type RecipeCardListProps = {
 
 type RenderRecipeListType = {
   scrollable?: boolean;
+  recipeList?: RecipeListData[];
 };
 
 const DEFAULT_RECIPE_CARD_WIDTH = "170px";
@@ -100,6 +30,8 @@ const DEFAULT_RECIPE_CARD_WIDTH = "170px";
 const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+
+  const [recipeList, setRecipeList] = useState<RecipeListData[] | undefined>();
 
   let grid: number;
   let imgHeight: string;
@@ -115,23 +47,42 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
     imgHeight = "14rem";
   }
 
-  const renderRecipeList = (props?: RenderRecipeListType) => {
-    return RECIPE_LIST.map((recipe, index) => {
-      const lastCard = index === RECIPE_LIST.length - 1 ? "mr-4" : "";
+  const fetchRecipeList = async () => {
+    const recipeListResponse: RecipeListResponse | null | undefined =
+      await getRecipe();
 
-      return (
-        <React.Fragment key={`recipe-card--${index}`}>
-          <RecipeCard
-            className={props?.scrollable ? lastCard : ""}
-            imgHeight={imgHeight}
-            width={props?.scrollable ? DEFAULT_RECIPE_CARD_WIDTH : ""}
-            author={AUTHOR}
-            recipe={recipe}
-            isLiked={false}
-          />
-        </React.Fragment>
-      );
-    });
+    if (recipeListResponse && recipeListResponse.status === STATUS_CODE.OK) {
+      setRecipeList(recipeListResponse.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecipeList();
+  }, []);
+
+  const renderRecipeList = ({
+    scrollable,
+    recipeList,
+  }: RenderRecipeListType) => {
+    return (
+      recipeList &&
+      recipeList.length > 0 &&
+      recipeList.map((recipe, index) => {
+        const lastCard = index === recipeList.length - 1 ? "mr-4" : "";
+
+        return (
+          <React.Fragment key={`recipe-card--${index}`}>
+            <RecipeCard
+              className={scrollable ? lastCard : ""}
+              imgHeight={imgHeight}
+              width={scrollable ? DEFAULT_RECIPE_CARD_WIDTH : ""}
+              recipe={recipe}
+              isLiked={false}
+            />
+          </React.Fragment>
+        );
+      })
+    );
   };
 
   return (
@@ -139,12 +90,12 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
       {scrollable ? (
         <RecipeCardListScroll className="-mr-5">
           <RecipeCardListContainer scrollable={scrollable}>
-            {renderRecipeList({ scrollable })}
+            {renderRecipeList({ scrollable: true, recipeList: recipeList })}
           </RecipeCardListContainer>
         </RecipeCardListScroll>
       ) : (
         <RecipeCardListContainer scrollable={scrollable} grid={grid}>
-          {renderRecipeList()}
+          {renderRecipeList({ scrollable: false, recipeList: recipeList })}
         </RecipeCardListContainer>
       )}
     </div>

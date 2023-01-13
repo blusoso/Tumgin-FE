@@ -1,8 +1,9 @@
 import React from "react";
 import { RecipeImgs, StaffPickBadge } from "../RecipeInfo/RecipeInfo.styled";
+import { RecipeData } from "@/services/recipe/getRecipe";
 
 type RecipeImagePreviewProps = {
-  recipe: any;
+  recipe: RecipeData;
   imgHeight?: string;
 };
 
@@ -14,11 +15,18 @@ const RecipeImagePreview = ({
 }: RecipeImagePreviewProps) => {
   return (
     <div className="relative">
-      <RecipeImgs backgroundImage={recipe.thumbnail} height={imgHeight} />
       {recipe && (
-        <StaffPickBadge>
-          <p>🏆 STAFF PICK!</p>
-        </StaffPickBadge>
+        <>
+          <RecipeImgs
+            backgroundImage={recipe.thumbnail_img || ""}
+            height={imgHeight}
+          />
+          {recipe.is_staff_pick && (
+            <StaffPickBadge>
+              <p>🏆 STAFF PICK!</p>
+            </StaffPickBadge>
+          )}
+        </>
       )}
     </div>
   );
