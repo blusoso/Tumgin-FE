@@ -220,6 +220,8 @@ const RecipeDetail = () => {
   const [recipeIngredient, setRecipeIngredient] =
     useState<RecipeIngredientData[] | undefined>();
 
+  console.log(recipe);
+
   let marginBetweenSection: string = "";
 
   if (isMobile) {
@@ -242,33 +244,14 @@ const RecipeDetail = () => {
     }
   };
 
-  const fetchRecipeIngredient = async () => {
-    if (id && typeof id === "string") {
-      const recipeIngredientResponse:
-        | RecipeIngredientListResponse
-        | null
-        | undefined = await getRecipeIngredientList({
-        recipe_id: parseInt(id),
-      });
-
-      if (
-        recipeIngredientResponse &&
-        recipeIngredientResponse.status === STATUS_CODE.OK
-      ) {
-        setRecipeIngredient(recipeIngredientResponse.data);
-      }
-    }
-  };
-
   useEffect(() => {
     fetchRecipe();
-    fetchRecipeIngredient();
   }, [id]);
 
   const recipeAuthor = (
     <div className="ml-2">
       <BaseAvatar
-        img={recipe?.profile_img || DEFAULT_THUMBNAIL_IMG}
+        img={recipe?.user.profile_img || DEFAULT_THUMBNAIL_IMG}
         size="36px"
         borderRadius={themeContext.borderRadiusSm}
       />
@@ -288,7 +271,7 @@ const RecipeDetail = () => {
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <BaseNavbar left={recipeAuthor} isBack />
-        <h3>{recipe?.username}</h3>
+        <h3>{recipe?.user.username}</h3>
       </div>
       <div className="flex items-center gap-3">
         {isMobile && <RecipeReactionButton isLiked={false} />}
@@ -316,9 +299,9 @@ const RecipeDetail = () => {
             <ReadMore>{recipe.description}</ReadMore>
           </div>
 
-          {recipeIngredient && recipeIngredient.length > 0 && (
+          {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 && (
             <div className={marginBetweenSection}>
-              <Ingredient recipeIngredientList={recipeIngredient} />
+              <Ingredient recipeIngredientList={recipe.recipe_ingredients} />
             </div>
           )}
 

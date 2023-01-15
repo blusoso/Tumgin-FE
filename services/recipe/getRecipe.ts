@@ -1,9 +1,20 @@
 import makeProtectedRequest, { METHOD } from "@/utils/api/makeProtectedRequest";
+import { UserResponse } from "../auth/createUser";
+import { RecipeIngredientData } from "./getRecipeIngredientList";
+
+export type DirectionData = {
+  id: number;
+  recipe_id: number;
+  step_number: number;
+  description: string;
+  is_active: boolean;
+  created_at: Date;
+  updated_at?: Date;
+  deleted_at?: Date;
+};
 
 export type RecipeData = {
   id: number;
-  username: string;
-  profile_img: string;
   name: string;
   name_en: string;
   slug: string;
@@ -21,6 +32,9 @@ export type RecipeData = {
   carb_percent?: number;
   is_staff_pick: boolean;
   created_at: Date;
+  user: UserResponse;
+  recipe_ingredients: RecipeIngredientData[];
+  directions: DirectionData[];
 };
 
 export type RecipeResponse = {
