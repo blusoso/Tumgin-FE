@@ -2,9 +2,10 @@ import { zeroPad } from "@/utils/number";
 import React, { useContext } from "react";
 import { ThemeContext } from "styled-components";
 import TopicHeader from "../TopicHeader/TopicHeader";
+import { DirectionData } from "@/services/recipe/getRecipe";
 
 type DirectionListProps = {
-  directionList: string[];
+  directionList: DirectionData[];
 };
 
 const DirectionList = ({ directionList }: DirectionListProps) => {
@@ -17,9 +18,11 @@ const DirectionList = ({ directionList }: DirectionListProps) => {
       </div>
 
       {directionList.map((direction, index) => (
-        <div key={`direction--${index}`} className="mb-2 flex gap-5">
-          <h2 className="text-secondary--light -mt-1">{zeroPad(index + 1)}</h2>
-          <p>{direction}</p>
+        <div key={`direction--${direction.id}`} className="mb-2 flex gap-5">
+          <h2 className="text-secondary--light -mt-1">
+            {zeroPad(direction.step_number)}
+          </h2>
+          <p>{direction.description}</p>
         </div>
       ))}
     </>

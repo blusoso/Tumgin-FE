@@ -1,6 +1,7 @@
 import makeProtectedRequest, { METHOD } from "@/utils/api/makeProtectedRequest";
 import { UserResponse } from "../auth/createUser";
 import { RecipeIngredientData } from "./getRecipeIngredientList";
+import { LikeRecipeData } from "./likeRecipe";
 
 export type DirectionData = {
   id: number;
@@ -35,6 +36,8 @@ export type RecipeData = {
   user: UserResponse;
   recipe_ingredients: RecipeIngredientData[];
   directions: DirectionData[];
+  user_like_recipes: LikeRecipeData[];
+  is_like: boolean;
 };
 
 export type RecipeResponse = {
@@ -43,7 +46,8 @@ export type RecipeResponse = {
 };
 
 export type RecipeRequest = {
-  id: number;
+  recipe_id: number;
+  user_id?: number;
 };
 
 const getRecipe = async (
@@ -51,7 +55,7 @@ const getRecipe = async (
 ): Promise<RecipeResponse | null | undefined> => {
   try {
     const result = await makeProtectedRequest(
-      `/food/recipe/${request.id}`,
+      `/food/recipe/${request.recipe_id}?user_id=${request.user_id}`,
       METHOD.GET
     );
 

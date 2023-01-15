@@ -25,6 +25,7 @@ import { BackgroundFadeToTop, HideScrollBar } from "@/components/Mixin/Mixin";
 import { STATUS_CODE } from "@/services/http/httpStatusCode";
 import getRecipe, {
   RecipeData,
+  RecipeRequest,
   RecipeResponse,
 } from "@/services/recipe/getRecipe";
 import { DEFAULT_THUMBNAIL_IMG } from "@/components/Card/RecipeCard";
@@ -32,6 +33,8 @@ import getRecipeIngredientList, {
   RecipeIngredientData,
   RecipeIngredientListResponse,
 } from "@/services/recipe/getRecipeIngredientList";
+import useCurrentUser from "@/utils/auth/useCurrentUser";
+import likeRecipe, { LikeRecipeRequest } from "@/services/recipe/likeRecipe";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -212,15 +215,13 @@ const RecipeDetail = () => {
   const themeContext = useContext(ThemeContext);
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+  const { user } = useCurrentUser();
 
   const router = useRouter();
   const { id } = router.query;
 
   const [recipe, setRecipe] = useState<RecipeData | undefined>();
-  const [recipeIngredient, setRecipeIngredient] =
-    useState<RecipeIngredientData[] | undefined>();
-
-  console.log(recipe);
+  const [isLikedActive, setIsLikedActive] = useState(false);
 
   let marginBetweenSection: string = "";
 
@@ -232,21 +233,48 @@ const RecipeDetail = () => {
 
   const fetchRecipe = async () => {
     if (id && typeof id === "string") {
+      let recipeRequest: RecipeRequest;
+
+      if (user) {
+        recipeRequest = {
+          recipe_id: parseInt(id),
+          user_id: user.id,
+        };
+      } else {
+        recipeRequest = {
+          recipe_id: parseInt(id),
+        };
+      }
+
+      console.log(recipeRequest);
+
       const recipeResponse: RecipeResponse | null | undefined = await getRecipe(
-        {
-          id: parseInt(id),
-        }
+        recipeRequest
       );
 
       if (recipeResponse && recipeResponse.status === STATUS_CODE.OK) {
         setRecipe(recipeResponse.data);
+        setIsLikedActive(recipeResponse.data.is_like);
+        console.log(recipeResponse.data);
       }
     }
   };
 
   useEffect(() => {
     fetchRecipe();
-  }, [id]);
+  }, [id, user]);
+
+  const handleToggleLikeRecipe = async () => {
+    if (user && recipe) {
+      const likeRecipeRequest: LikeRecipeRequest = {
+        user_id: user.id,
+        recipe_id: recipe.id,
+      };
+
+      await likeRecipe(likeRecipeRequest);
+      setIsLikedActive(!isLikedActive);
+    }
+  };
 
   const recipeAuthor = (
     <div className="ml-2">
@@ -267,6 +295,18 @@ const RecipeDetail = () => {
     Router.push(recipeCookingLink);
   };
 
+  const renderRecipeReactionButton = () => {
+    if (recipe) {
+      return (
+        <RecipeReactionButton
+          isLiked={isLikedActive}
+          isUserLoggedIn={!!user}
+          onToggleLikeRecipe={handleToggleLikeRecipe}
+        />
+      );
+    }
+  };
+
   const renderRecipeDetailHeader = (
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
@@ -274,7 +314,7 @@ const RecipeDetail = () => {
         <h3>{recipe?.user.username}</h3>
       </div>
       <div className="flex items-center gap-3">
-        {isMobile && <RecipeReactionButton isLiked={false} />}
+        {isMobile && renderRecipeReactionButton()}
       </div>
     </div>
   );
@@ -288,7 +328,7 @@ const RecipeDetail = () => {
           className={`relative ${isTablet ? "px-20" : !isMobile && "px-72"}`}
         >
           <RecipeReactionFixed>
-            {!isMobile && <RecipeReactionButton isLiked={false} />}
+            {!isMobile && renderRecipeReactionButton()}
           </RecipeReactionFixed>
 
           {renderRecipeDetailHeader}
@@ -305,9 +345,11 @@ const RecipeDetail = () => {
             </div>
           )}
 
-          <div className={marginBetweenSection}>
-            <DirectionList directionList={RECIPE_DETAIL.directions} />
-          </div>
+          {recipe.directions && recipe.directions.length > 0 && (
+            <div className={marginBetweenSection}>
+              <DirectionList directionList={recipe.directions} />
+            </div>
+          )}
 
           <div className={marginBetweenSection}>
             <RecipeComment commentList={RECIPE_DETAIL.comments} />
