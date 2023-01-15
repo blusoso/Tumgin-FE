@@ -28,6 +28,10 @@ import getRecipe, {
   RecipeResponse,
 } from "@/services/recipe/getRecipe";
 import { DEFAULT_THUMBNAIL_IMG } from "@/components/Card/RecipeCard";
+import getRecipeIngredientList, {
+  RecipeIngredientData,
+  RecipeIngredientListResponse,
+} from "@/services/recipe/getRecipeIngredientList";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -213,6 +217,8 @@ const RecipeDetail = () => {
   const { id } = router.query;
 
   const [recipe, setRecipe] = useState<RecipeData | undefined>();
+  const [recipeIngredient, setRecipeIngredient] =
+    useState<RecipeIngredientData[] | undefined>();
 
   let marginBetweenSection: string = "";
 
@@ -236,8 +242,27 @@ const RecipeDetail = () => {
     }
   };
 
+  const fetchRecipeIngredient = async () => {
+    if (id && typeof id === "string") {
+      const recipeIngredientResponse:
+        | RecipeIngredientListResponse
+        | null
+        | undefined = await getRecipeIngredientList({
+        recipe_id: parseInt(id),
+      });
+
+      if (
+        recipeIngredientResponse &&
+        recipeIngredientResponse.status === STATUS_CODE.OK
+      ) {
+        setRecipeIngredient(recipeIngredientResponse.data);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchRecipe();
+    fetchRecipeIngredient();
   }, [id]);
 
   const recipeAuthor = (
@@ -291,9 +316,11 @@ const RecipeDetail = () => {
             <ReadMore>{recipe.description}</ReadMore>
           </div>
 
-          <div className={marginBetweenSection}>
-            <Ingredient ingredientList={RECIPE_DETAIL.ingredients} />
-          </div>
+          {recipeIngredient && recipeIngredient.length > 0 && (
+            <div className={marginBetweenSection}>
+              <Ingredient recipeIngredientList={recipeIngredient} />
+            </div>
+          )}
 
           <div className={marginBetweenSection}>
             <DirectionList directionList={RECIPE_DETAIL.directions} />

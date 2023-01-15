@@ -73,8 +73,6 @@ const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
     );
   };
 
-  console.log(typeof recipe.difficult_level);
-
   return (
     <div className="mt-2">
       <div className="text-center">
