@@ -2,6 +2,7 @@ import Link from "next/link";
 import moment from "moment";
 import React, { useContext, useState } from "react";
 import { ThemeContext } from "styled-components";
+import { useRouter } from "next/router";
 
 import { RecipeData } from "@/services/recipe/getRecipe";
 import BaseAvatar from "../Avatar/BaseAvatar/BaseAvatar";
@@ -15,6 +16,7 @@ import {
   SubTitle,
 } from "./RecipeCard.styled";
 import { formatTime } from "@/utils/time";
+import likeRecipe, { LikeRecipeRequest } from "@/services/recipe/likeRecipe";
 
 export type Author = {
   img: string;
@@ -26,6 +28,7 @@ export type RecipeCardProps = {
   imgHeight?: string;
   recipe: RecipeData;
   isLiked: boolean;
+  user: any;
   width?: string;
 };
 
@@ -38,28 +41,41 @@ const RecipeCard = ({
   imgHeight,
   recipe,
   isLiked,
+  user,
   width,
 }: RecipeCardProps) => {
   moment.locale();
 
+  const router = useRouter();
   const themeContext = useContext(ThemeContext);
   const [isLikedActive, setIsLikedActive] = useState(isLiked);
   const recipeLink = `/recipe/${recipe.id}/${recipe.slug}`;
 
-  const toggleLikeRecipe = () => {
-    setIsLikedActive(!isLikedActive);
+  const toggleLikeRecipe = async () => {
+    if (user && recipe) {
+      const likeRecipeRequest: LikeRecipeRequest = {
+        user_id: user.id,
+        recipe_id: recipe.id,
+      };
+
+      await likeRecipe(likeRecipeRequest);
+
+      setIsLikedActive(!isLikedActive);
+    } else {
+      router.push("/session/new");
+    }
   };
 
   return (
     <div className={className} style={{ width: width || "inherit" }}>
       <div className="flex gap-3 items-center">
         <BaseAvatar
-          img={recipe.profile_img}
+          img={recipe.user.profile_img || ""}
           size="36px"
           borderRadius={themeContext.borderRadiusSm}
         />
         <div>
-          <h3>{recipe.username}</h3>
+          <h3>{recipe.user.username}</h3>
           <CreatedAtLabel>{moment(recipe.created_at).fromNow()}</CreatedAtLabel>
         </div>
         <div className="ml-auto">

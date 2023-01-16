@@ -7,11 +7,11 @@ import {
 } from "./RecipeCarfList.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
-import getRecipe, {
-  RecipeListData,
-  RecipeListResponse,
-} from "@/services/recipe/getRecipeList";
+import getRecipe, { RecipeListResponse } from "@/services/recipe/getRecipeList";
 import { STATUS_CODE } from "@/services/http/httpStatusCode";
+import { RecipeData } from "@/services/recipe/getRecipe";
+import getRecipeList from "@/services/recipe/getRecipeList";
+import useCurrentUser from "@/utils/auth/useCurrentUser";
 
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
@@ -22,7 +22,7 @@ type RecipeCardListProps = {
 
 type RenderRecipeListType = {
   scrollable?: boolean;
-  recipeList?: RecipeListData[];
+  recipeList?: RecipeData[];
 };
 
 const DEFAULT_RECIPE_CARD_WIDTH = "170px";
@@ -30,8 +30,9 @@ const DEFAULT_RECIPE_CARD_WIDTH = "170px";
 const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
+  const { user } = useCurrentUser();
 
-  const [recipeList, setRecipeList] = useState<RecipeListData[] | undefined>();
+  const [recipeList, setRecipeList] = useState<RecipeData[] | undefined>();
 
   let grid: number;
   let imgHeight: string;
@@ -49,7 +50,7 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
 
   const fetchRecipeList = async () => {
     const recipeListResponse: RecipeListResponse | null | undefined =
-      await getRecipe();
+      await getRecipeList({ user_id: user?.id });
 
     if (recipeListResponse && recipeListResponse.status === STATUS_CODE.OK) {
       setRecipeList(recipeListResponse.data);
@@ -58,7 +59,7 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
 
   useEffect(() => {
     fetchRecipeList();
-  }, []);
+  }, [user]);
 
   const renderRecipeList = ({
     scrollable,
@@ -77,7 +78,8 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
               imgHeight={imgHeight}
               width={scrollable ? DEFAULT_RECIPE_CARD_WIDTH : ""}
               recipe={recipe}
-              isLiked={false}
+              user={user}
+              isLiked={recipe.is_like || false}
             />
           </React.Fragment>
         );

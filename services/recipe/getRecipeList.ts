@@ -6,11 +6,18 @@ export type RecipeListResponse = {
   data: RecipeData[];
 };
 
-const getRecipeList = async (): Promise<
-  RecipeListResponse | null | undefined
-> => {
+export type RecipeListRequest = {
+  user_id?: number;
+};
+
+const getRecipeList = async (
+  request: RecipeListRequest
+): Promise<RecipeListResponse | null | undefined> => {
   try {
-    const result = await makeProtectedRequest(`/food/recipe`, METHOD.GET);
+    const result = await makeProtectedRequest(
+      `/food/recipe?user_id=${request.user_id}`,
+      METHOD.GET
+    );
 
     return result;
   } catch (error) {

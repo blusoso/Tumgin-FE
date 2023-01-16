@@ -34,10 +34,10 @@ export type RecipeData = {
   is_staff_pick: boolean;
   created_at: Date;
   user: UserResponse;
-  recipe_ingredients: RecipeIngredientData[];
-  directions: DirectionData[];
+  recipe_ingredients?: RecipeIngredientData[];
+  directions?: DirectionData[];
   user_like_recipes: LikeRecipeData[];
-  is_like: boolean;
+  is_like?: boolean;
 };
 
 export type RecipeResponse = {
