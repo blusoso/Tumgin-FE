@@ -6,6 +6,9 @@ type StarRatingProps = {
   className?: string;
   totalStar?: number;
   starWidth?: string;
+  isResetRating?: boolean;
+  canSelect?: boolean;
+  defaultRating?: number;
   onStarRatingClick?: () => void;
 };
 
@@ -16,14 +19,19 @@ const StarRating = ({
   className = "",
   totalStar = TOTAL_STAR,
   starWidth = STAR_WIDTH,
+  isResetRating = false,
+  canSelect = false,
+  defaultRating,
   onStarRatingClick,
 }: StarRatingProps) => {
   const themeContext = useContext(ThemeContext);
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(defaultRating || 0);
 
   const handleStarRating = (index: number) => {
-    setRating(index);
-    if (onStarRatingClick) onStarRatingClick();
+    if (canSelect) {
+      setRating(index);
+      if (onStarRatingClick) onStarRatingClick();
+    }
   };
 
   const resetStarRating = () => {
@@ -55,12 +63,15 @@ const StarRating = ({
           );
         })}
       </div>
-      <div
-        className="text-secondary underline underline-offset-4 cursor-pointer"
-        onClick={resetStarRating}
-      >
-        รีเซ็ตดาว
-      </div>
+
+      {isResetRating && (
+        <div
+          className="text-secondary underline underline-offset-4 cursor-pointer"
+          onClick={resetStarRating}
+        >
+          รีเซ็ตดาว
+        </div>
+      )}
     </div>
   );
 };

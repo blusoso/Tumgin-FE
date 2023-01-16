@@ -31,6 +31,12 @@ import getRecipe, {
 import { DEFAULT_THUMBNAIL_IMG } from "@/components/Card/RecipeCard";
 import useCurrentUser from "@/utils/auth/useCurrentUser";
 import likeRecipe, { LikeRecipeRequest } from "@/services/recipe/likeRecipe";
+import getReviewList, {
+  ReviewData,
+  ReviewListRequest,
+  ReviewListResponse,
+} from "@/services/recipe/getReviewList";
+import LoadMoreButton from "@/components/Button/LoadMoreButton/LoadMoreButton";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -84,6 +90,7 @@ export const IngredientSection = styled(HideScrollBar)`
 `;
 
 const COOKING_ICON_WIDTH = "1.5rem";
+const DEFAULT_REVIEW_LIMIT = 5;
 
 const RecipeDetail = () => {
   const themeContext = useContext(ThemeContext);
@@ -96,6 +103,10 @@ const RecipeDetail = () => {
 
   const [recipe, setRecipe] = useState<RecipeData | undefined>();
   const [isLikedActive, setIsLikedActive] = useState(false);
+  const [reviewList, setReviewList] = useState<ReviewData[] | undefined>();
+  const [skipReview, setSkipReview] = useState<number>(0);
+  const [showLoadMoreReviewButton, setShowLoadMoreReviewButton] =
+    useState(false);
 
   let marginBetweenSection: string = "";
 
@@ -133,9 +144,44 @@ const RecipeDetail = () => {
     }
   };
 
+  const fetchReview = async (skip?: number, limit?: number) => {
+    if (recipe) {
+      const reviewRequest: ReviewListRequest = {
+        recipe_id: recipe.id,
+        skip: skip || 0,
+        limit: limit || DEFAULT_REVIEW_LIMIT,
+      };
+
+      const reviewResponse: ReviewListResponse | null | undefined =
+        await getReviewList(reviewRequest);
+
+      if (reviewResponse && reviewResponse.status === STATUS_CODE.OK) {
+        if (!reviewList) {
+          setReviewList(reviewResponse.data);
+        } else {
+          setReviewList([...reviewList, ...reviewResponse.data]);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     fetchRecipe();
   }, [id, user]);
+
+  useEffect(() => {
+    fetchReview();
+  }, [recipe]);
+
+  useEffect(() => {
+    if (reviewList && recipe) {
+      if (reviewList.length === recipe.review_amount) {
+        setShowLoadMoreReviewButton(false);
+      } else if (recipe.review_amount > DEFAULT_REVIEW_LIMIT) {
+        setShowLoadMoreReviewButton(true);
+      }
+    }
+  }, [reviewList]);
 
   const handleToggleLikeRecipe = async () => {
     if (user && recipe) {
@@ -194,6 +240,17 @@ const RecipeDetail = () => {
     </div>
   );
 
+  const handleLoadMoreReview = async () => {
+    if (recipe) {
+      if (skipReview < recipe.review_amount - 1) {
+        const nextReview = skipReview + DEFAULT_REVIEW_LIMIT;
+
+        setSkipReview(nextReview);
+        await fetchReview(nextReview);
+      }
+    }
+  };
+
   return (
     <div className="relative">
       <HomeNavbar />
@@ -226,15 +283,23 @@ const RecipeDetail = () => {
             </div>
           )}
 
-          {/* <div className={marginBetweenSection}>
-            <RecipeComment commentList={RECIPE_DETAIL.comments} />
+          <div className={marginBetweenSection}>
+            <RecipeComment reviewAmount={recipe.review_amount} />
           </div>
 
           <HorizonLine />
 
-          <div className={marginBetweenSection}>
-            <RecipeFeedbackList commentList={RECIPE_DETAIL.comments} />
-          </div> */}
+          {reviewList && reviewList.length > 0 && (
+            <>
+              <div className={marginBetweenSection}>
+                <RecipeFeedbackList reviewList={reviewList} />
+              </div>
+
+              {showLoadMoreReviewButton && (
+                <LoadMoreButton onLoadMoreClick={handleLoadMoreReview} />
+              )}
+            </>
+          )}
         </div>
       )}
 

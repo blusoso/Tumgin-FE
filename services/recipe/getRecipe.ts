@@ -2,6 +2,7 @@ import makeProtectedRequest, { METHOD } from "@/utils/api/makeProtectedRequest";
 import { UserResponse } from "../auth/createUser";
 import { RecipeIngredientData } from "./getRecipeIngredientList";
 import { LikeRecipeData } from "./likeRecipe";
+import { ReviewData } from "./getReviewList";
 
 export type DirectionData = {
   id: number;
@@ -38,6 +39,8 @@ export type RecipeData = {
   directions?: DirectionData[];
   user_like_recipes: LikeRecipeData[];
   is_like?: boolean;
+  reviews?: ReviewData[];
+  review_amount: number;
 };
 
 export type RecipeResponse = {

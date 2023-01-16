@@ -6,22 +6,24 @@ import CommentInput from "@/components/Input/CommentInput/CommentInput";
 import StarRating from "@/components/StarRating/StarRating";
 
 type RecipeCommentProps = {
-  commentList: any;
+  reviewAmount: number;
 };
 
-const RecipeComment = ({ commentList }: RecipeCommentProps) => {
+const RecipeComment = ({ reviewAmount }: RecipeCommentProps) => {
   const themeContext = useContext(ThemeContext);
 
   return (
     <div>
       <h3>
         <span>ความคิดเห็น </span>
-        <span className="text-secondary">({commentList.length})</span>
+        {reviewAmount > 0 && (
+          <span className="text-secondary">({reviewAmount})</span>
+        )}
       </h3>
       <div className="flex gap-2.5 mt-3">
         <MyAvatar />
         <div className="w-full">
-          <StarRating className="my-2 mb-3" />
+          <StarRating className="my-2 mb-3" isResetRating canSelect />
           <CommentInput />
         </div>
       </div>

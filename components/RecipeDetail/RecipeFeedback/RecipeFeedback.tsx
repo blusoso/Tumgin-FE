@@ -5,12 +5,15 @@ import ReadMore from "@/components/ReadMore/ReadMore";
 import CommentInput from "@/components/Input/CommentInput/CommentInput";
 import { VerticalLine } from "./RecipeFeedback.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
+import moment from "moment";
+import StarRating from "@/components/StarRating/StarRating";
+import { ReviewData } from "@/services/recipe/getReviewList";
 
 type RecipeFeedbackProps = {
-  comment: any;
+  review: ReviewData;
 };
 
-const RecipeFeedback = ({ comment }: RecipeFeedbackProps) => {
+const RecipeFeedback = ({ review }: RecipeFeedbackProps) => {
   const themeContext = useContext(ThemeContext);
   const isMobile = useDetectMobile();
 
@@ -24,40 +27,53 @@ const RecipeFeedback = ({ comment }: RecipeFeedbackProps) => {
     gap = 5;
   }
 
-  const renderCommentAvatar = (comment: any) => (
+  const renderCommentAvatar = (avatarImage?: string) => (
     <BaseAvatar
-      img={comment.avatar}
+      img={avatarImage || ""}
       size="3.125rem"
       borderRadius={themeContext.borderRadiusSm}
     />
   );
 
-  const renderComment = (comment: any) => (
+  const renderReview = (review: ReviewData) => (
     <>
       <div className="flex items-center gap-1">
-        <h3>{comment.user}</h3>
-        <p className="text-sm text-secondary mt-1">・{comment.created_at}</p>
+        <h3>{review.user.username}</h3>
+        <p className="text-sm text-secondary mt-1">
+          ・{moment(review.created_at).fromNow()}
+        </p>
       </div>
+
+      <div className="w-full">
+        <StarRating
+          className="my-1 mb-2"
+          defaultRating={review.rating}
+          starWidth="1.2rem"
+        />
+      </div>
+
       <div className="my-1">
-        <ReadMore limitText={75}>{comment.message}</ReadMore>
+        <ReadMore limitText={75}>{review.comment}</ReadMore>
       </div>
     </>
   );
 
   return (
     <div className={`flex gap-${gap} my-5`}>
-      <div>{renderCommentAvatar(comment)}</div>
+      {review && (
+        <>
+          <div>{renderCommentAvatar(review.user.profile_img)}</div>
 
-      <div>
-        {renderComment(comment)}
-        <h3
-          className="text-green"
-          onClick={() => setIsShowCommentInput(!isShowCommentInput)}
-        >
-          ตอบกลับ
-        </h3>
+          <div>
+            {renderReview(review)}
+            {/* <h3
+              className="text-green"
+              onClick={() => setIsShowCommentInput(!isShowCommentInput)}
+            >
+              ตอบกลับ
+            </h3> */}
 
-        {comment.comments.length > 0 &&
+            {/* {comment.comments.length > 0 &&
           comment.comments.map((subComment: any, index: number) => (
             <div
               key={`receip__sub-comment--${subComment.id}-${index}`}
@@ -72,14 +88,16 @@ const RecipeFeedback = ({ comment }: RecipeFeedbackProps) => {
               </div>
               <div>{renderComment(subComment)}</div>
             </div>
-          ))}
+          ))} */}
 
-        {isShowCommentInput && (
-          <div className="mt-3">
-            <CommentInput />
+            {/* {isShowCommentInput && (
+              <div className="mt-3">
+                <CommentInput />
+              </div>
+            )} */}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };
