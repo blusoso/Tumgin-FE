@@ -43,6 +43,9 @@ import CreateReview, {
 } from "@/services/recipe/createReview";
 import { useRecoilState } from "recoil";
 import { reviewInputState } from "@/recoils/index";
+import SlideModal from "@/components/Modal/SlideModal/SlideModal";
+import BaseModal from "@/components/Modal/BaseModal/BaseModal";
+import { formatTime } from "@/utils/time";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -232,10 +235,19 @@ const RecipeDetail = () => {
 
   const renderRecipeReactionButton = () => {
     if (recipe) {
+      const sharedUrl = `${process.env.NEXT_PUBLIC_HOST}/recipe/${recipe.id}/${recipe.slug}`;
+      const sharedTitle = `ミ${APP_NAME}ミ ${recipe.name} | 🔥 ${
+        recipe.calory
+      } Kcal | 🕒 ใช้เวลาในการทำ ${formatTime(
+        recipe.minute || 0
+      )} | 🥗 อาหารเพื่อสุขภาพสุดแสนอร่อย`;
+
       return (
         <RecipeReactionButton
           isLiked={isLikedActive}
           isUserLoggedIn={!!user}
+          sharedUrl={sharedUrl}
+          sharedTitle={sharedTitle}
           onToggleLikeRecipe={handleToggleLikeRecipe}
         />
       );

@@ -23,6 +23,7 @@ export enum ALIGN_ITEM {
 }
 
 export type BaseModalProps = {
+  className?: string;
   position?: string;
   isOverlay?: boolean;
   isOpen?: boolean;
@@ -48,6 +49,7 @@ export type BaseModalProps = {
 };
 
 const BaseModal = ({
+  className = "",
   position,
   isOverlay = true,
   isOpen = false,
@@ -114,6 +116,7 @@ const BaseModal = ({
     <>
       {isOpen && (
         <ModalOverlay
+          className={className}
           isOverlay={isOverlay}
           position={position}
           alignItem={alignItem}
