@@ -3,4 +3,5 @@ export const KEYS = {
   SEARCH: "SEARCH",
   MODAL: "MODAL",
   COOKIE: "COOKIE",
+  REVIEW_INPUT: "REVIEW_INPUT",
 };

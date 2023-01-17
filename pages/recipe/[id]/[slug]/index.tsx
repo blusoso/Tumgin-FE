@@ -37,6 +37,12 @@ import getReviewList, {
   ReviewListResponse,
 } from "@/services/recipe/getReviewList";
 import LoadMoreButton from "@/components/Button/LoadMoreButton/LoadMoreButton";
+import CreateReview, {
+  CreateReviewRequest,
+  CreateReviewResponse,
+} from "@/services/recipe/createReview";
+import { useRecoilState } from "recoil";
+import { reviewInputState } from "@/recoils/index";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -89,6 +95,11 @@ export const IngredientSection = styled(HideScrollBar)`
   overflow: scroll;
 `;
 
+export type ReviewInput = {
+  message: string;
+  rating: number;
+};
+
 const COOKING_ICON_WIDTH = "1.5rem";
 const DEFAULT_REVIEW_LIMIT = 5;
 
@@ -101,9 +112,12 @@ const RecipeDetail = () => {
   const router = useRouter();
   const { id } = router.query;
 
+  const [reviewInput, setReviewInput] = useRecoilState(reviewInputState);
+
   const [recipe, setRecipe] = useState<RecipeData | undefined>();
   const [isLikedActive, setIsLikedActive] = useState(false);
   const [reviewList, setReviewList] = useState<ReviewData[] | undefined>();
+  const [addedReviewList, setAddedReviewList] = useState<ReviewData[] | []>([]);
   const [skipReview, setSkipReview] = useState<number>(0);
   const [showLoadMoreReviewButton, setShowLoadMoreReviewButton] =
     useState(false);
@@ -175,7 +189,7 @@ const RecipeDetail = () => {
 
   useEffect(() => {
     if (reviewList && recipe) {
-      if (reviewList.length === recipe.review_amount) {
+      if (recipe.review_amount <= reviewList.length + addedReviewList.length) {
         setShowLoadMoreReviewButton(false);
       } else if (recipe.review_amount > DEFAULT_REVIEW_LIMIT) {
         setShowLoadMoreReviewButton(true);
@@ -251,6 +265,42 @@ const RecipeDetail = () => {
     }
   };
 
+  const handleStarRating = (newRating: number) => {
+    setReviewInput({ ...reviewInput, rating: newRating });
+  };
+
+  const handleReviewMessageChange = (e: any) => {
+    setReviewInput({ ...reviewInput, message: e.target.value });
+  };
+
+  const handleReviewRecipe = async () => {
+    if (user && recipe) {
+      const createReviewRequest: CreateReviewRequest = {
+        user_id: user.id,
+        recipe_id: recipe.id,
+        rating: reviewInput.rating,
+        comment: reviewInput.message,
+      };
+
+      const createReviewResponse: CreateReviewResponse | null | undefined =
+        await CreateReview(createReviewRequest);
+
+      if (
+        createReviewResponse &&
+        createReviewResponse.status === STATUS_CODE.OK
+      ) {
+        if (reviewList) {
+          setAddedReviewList([
+            // @ts-ignore
+            ...[createReviewResponse.data],
+            // @ts-ignore
+            ...addedReviewList,
+          ]);
+        }
+      }
+    }
+  };
+
   return (
     <div className="relative">
       <HomeNavbar />
@@ -283,15 +333,31 @@ const RecipeDetail = () => {
             </div>
           )}
 
-          <div className={marginBetweenSection}>
-            <RecipeComment reviewAmount={recipe.review_amount} />
-          </div>
+          {user ? (
+            <div className={marginBetweenSection}>
+              <RecipeComment
+                profileImg={user.profile_img || ""}
+                reviewAmount={recipe.review_amount}
+                onStarRating={handleStarRating}
+                onReviewMessageChange={handleReviewMessageChange}
+                onSubmit={handleReviewRecipe}
+              />
+            </div>
+          ) : (
+            <>
+              <h3>เข้าสู่ระบบเพื่อแชร์ความคิดเห็นของคุณ</h3>
+            </>
+          )}
 
           {reviewList && reviewList.length > 0 && (
             <>
               <HorizonLine />
 
               <div className={marginBetweenSection}>
+                {addedReviewList && addedReviewList.length > 0 && (
+                  <RecipeFeedbackList reviewList={addedReviewList} />
+                )}
+
                 <RecipeFeedbackList reviewList={reviewList} />
               </div>
 

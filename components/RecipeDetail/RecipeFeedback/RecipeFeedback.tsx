@@ -44,13 +44,17 @@ const RecipeFeedback = ({ review }: RecipeFeedbackProps) => {
         </p>
       </div>
 
-      <div className="w-full">
-        <StarRating
-          className="my-1 mb-2"
-          defaultRating={review.rating}
-          starWidth="1.2rem"
-        />
-      </div>
+      {review.rating && review.rating > 0 ? (
+        <div className="w-full">
+          <StarRating
+            className="my-1 mb-2"
+            rating={review.rating}
+            starWidth="1.2rem"
+          />
+        </div>
+      ) : (
+        ""
+      )}
 
       <div className="my-1">
         <ReadMore limitText={75}>{review.comment}</ReadMore>

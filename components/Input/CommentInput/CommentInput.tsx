@@ -4,21 +4,35 @@ import Input, { INPUT_TYPE } from "../Input";
 import { CommentInputWrapper, ImageIconWrapper } from "./CommentInput.styled";
 import ImageIcon from "@/components/Icon/ImageIcon";
 
-const CommentInput = () => {
+type CommentInput = {
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+};
+
+const CommentInput = ({
+  value,
+  placeholder,
+  onChange,
+  onSubmit,
+}: CommentInput) => {
   return (
     <>
       <CommentInputWrapper>
         <Input
           id="recipe__comment-input"
           type={INPUT_TYPE.TEXTAREA}
-          placeholder="เพิ่มความคิดเห็นของคุณ"
+          value={value}
+          placeholder={placeholder}
           endIcon={<PaperPlaneIcon />}
           autoResizeTextArea
-          onEndIconClick={() => console.log("submit")}
+          onChange={onChange}
+          onEndIconClick={onSubmit}
         />
-        <ImageIconWrapper>
+        {/* <ImageIconWrapper>
           <ImageIcon />
-        </ImageIconWrapper>
+        </ImageIconWrapper> */}
       </CommentInputWrapper>
     </>
   );

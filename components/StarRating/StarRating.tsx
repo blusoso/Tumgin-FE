@@ -7,9 +7,10 @@ type StarRatingProps = {
   totalStar?: number;
   starWidth?: string;
   isResetRating?: boolean;
-  canSelect?: boolean;
   defaultRating?: number;
-  onStarRatingClick?: () => void;
+  rating: number;
+  handleStarRating?: (index: number) => void;
+  onResetStarRating?: () => void;
 };
 
 const TOTAL_STAR = 5;
@@ -20,23 +21,12 @@ const StarRating = ({
   totalStar = TOTAL_STAR,
   starWidth = STAR_WIDTH,
   isResetRating = false,
-  canSelect = false,
   defaultRating,
-  onStarRatingClick,
+  rating,
+  handleStarRating,
+  onResetStarRating,
 }: StarRatingProps) => {
   const themeContext = useContext(ThemeContext);
-  const [rating, setRating] = useState(defaultRating || 0);
-
-  const handleStarRating = (index: number) => {
-    if (canSelect) {
-      setRating(index);
-      if (onStarRatingClick) onStarRatingClick();
-    }
-  };
-
-  const resetStarRating = () => {
-    setRating(0);
-  };
 
   return (
     <div className={`flex items-center justify-between ${className}`}>
@@ -48,7 +38,7 @@ const StarRating = ({
             <div
               key={`star-rating--${index}`}
               className="mr-1"
-              onClick={() => handleStarRating(index)}
+              onClick={() => handleStarRating && handleStarRating(index)}
             >
               <StarIcon
                 isOutline={false}
@@ -67,7 +57,7 @@ const StarRating = ({
       {isResetRating && (
         <div
           className="text-secondary underline underline-offset-4 cursor-pointer"
-          onClick={resetStarRating}
+          onClick={onResetStarRating}
         >
           รีเซ็ตดาว
         </div>
