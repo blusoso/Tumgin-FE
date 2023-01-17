@@ -50,7 +50,7 @@ const RecipeReactionButton = ({
   const isMobile = useDetectMobile();
 
   const heartIconColor = themeContext.redColor;
-  const [isShareModalOpen, setIsShareModalOpen] = useState(true);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isOpenCopyAlert, setIsOpenCopyAlert] = useState(false);
 
   const toggleLikeRecipe = () => {

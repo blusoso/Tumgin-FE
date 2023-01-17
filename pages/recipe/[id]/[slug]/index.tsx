@@ -46,6 +46,7 @@ import { reviewInputState } from "@/recoils/index";
 import SlideModal from "@/components/Modal/SlideModal/SlideModal";
 import BaseModal from "@/components/Modal/BaseModal/BaseModal";
 import { formatTime } from "@/utils/time";
+import Link from "next/link";
 
 const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 const avatarImg = `${IMAGE_PATH}/avatar.png`;
@@ -96,6 +97,15 @@ export const IngredientSection = styled(HideScrollBar)`
   padding: 1rem 1.8rem;
   max-height: 25rem;
   overflow: scroll;
+`;
+
+export const GuestCommentReview = styled.div`
+  background: ${({ theme }) => theme.lightGreenColor};
+  text-align: center;
+  border-radius: ${({ theme }) => theme.borderRadiusLg};
+
+  padding: 1.2rem;
+  margin-top: 1rem;
 `;
 
 export type ReviewInput = {
@@ -345,6 +355,13 @@ const RecipeDetail = () => {
             </div>
           )}
 
+          <h3>
+            <span>ความคิดเห็น </span>
+            {recipe.review_amount > 0 && (
+              <span className="text-secondary">({recipe.review_amount})</span>
+            )}
+          </h3>
+
           {user ? (
             <div className={marginBetweenSection}>
               <RecipeComment
@@ -357,7 +374,14 @@ const RecipeDetail = () => {
             </div>
           ) : (
             <>
-              <h3>เข้าสู่ระบบเพื่อแชร์ความคิดเห็นของคุณ</h3>
+              <GuestCommentReview>
+                <h4>
+                  <Link href="/session/new" className="link--underline">
+                    เข้าสู่ระบบ
+                  </Link>
+                </h4>
+                <p>เพื่อแชร์ความคิดเห็นของคุณ</p>
+              </GuestCommentReview>
             </>
           )}
 
