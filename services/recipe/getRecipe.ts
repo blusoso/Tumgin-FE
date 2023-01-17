@@ -41,6 +41,7 @@ export type RecipeData = {
   is_like?: boolean;
   reviews?: ReviewData[];
   review_amount: number;
+  review_avg: number;
 };
 
 export type RecipeResponse = {

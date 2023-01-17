@@ -287,10 +287,10 @@ const RecipeDetail = () => {
             <RecipeComment reviewAmount={recipe.review_amount} />
           </div>
 
-          <HorizonLine />
-
           {reviewList && reviewList.length > 0 && (
             <>
+              <HorizonLine />
+
               <div className={marginBetweenSection}>
                 <RecipeFeedbackList reviewList={reviewList} />
               </div>

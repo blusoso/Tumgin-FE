@@ -10,10 +10,19 @@ import RecipeInfoList from "../RecipeInfoList/RecipeInfoList";
 
 import { CreatedAtLabel } from "@/components/Card/RecipeCard.styled";
 import { DifficultLevelLabel, NutritionCard } from "./RecipeInfo.styled";
+import { IMAGE_PATH } from "@/utils/constant";
+import ImageCarousel from "@/components/ImageCarousel/ImageCarousel";
 
 type RecipeInfoProps = {
   recipe: RecipeData;
 };
+
+const EXAMPLE_IMG_LIST = [
+  `${IMAGE_PATH}/example-recipe.jpg`,
+  `${IMAGE_PATH}/example-recipe-2.jpg`,
+  `${IMAGE_PATH}/example-recipe-3.jpg`,
+  `${IMAGE_PATH}/example-recipe-4.jpg`,
+];
 
 const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
   const isMobile = useDetectMobile();
@@ -84,15 +93,22 @@ const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
           </DifficultLevelLabel>
         )}
       </div>
+
       <div className="my-3">
-        <RecipeImagePreview
-          recipe={recipe}
+        <ImageCarousel
+          images={EXAMPLE_IMG_LIST}
           imgHeight={isMobile ? "15rem" : "28rem"}
         />
       </div>
       <div className="flex justify-between">
-        <p className="text-secondary">123 คนเคยลองสูตรนี้</p>
-        {/* <p className="font-normal">⭐ {recipe.rating_avg}</p> */}
+        <p className="text-secondary">
+          {recipe.review_amount
+            ? `${recipe.review_amount} คนเคยลองสูตรนี้`
+            : "ยังไม่เคยมีใครลองสูตรนี้ ลองเลยคุณคนแรก!"}
+        </p>
+        <p className="font-normal">
+          ⭐ {recipe.review_amount > 0 ? recipe.review_avg : "-"}
+        </p>
       </div>
 
       <RecipeInfoList recipe={recipe} />

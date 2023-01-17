@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { motion } from "framer-motion";
 
 export const DifficultLevelLabel = styled.p`
   color: ${({ theme }) => theme.grayColor};
@@ -9,7 +10,7 @@ type RecipeImgsType = {
   height: string;
 };
 
-export const RecipeImgs = styled.div<RecipeImgsType>`
+export const RecipeImgs = styled(motion.div)<RecipeImgsType>`
   background: ${({ backgroundImage }) => `url("${backgroundImage}")`};
   background-size: cover;
   background-repeat: no-repeat;

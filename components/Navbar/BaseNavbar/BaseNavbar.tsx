@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { ThemeContext } from "styled-components";
 import ChevronIcon from "../../Icon/ChevronIcon";
+import { useRouter } from "next/router";
 
 export type BaseNavbarProps = {
   left?: JSX.Element | string;
@@ -22,9 +23,10 @@ const BaseNavbar = ({
   onNext,
 }: BaseNavbarProps) => {
   const themeContext = useContext(ThemeContext);
+  const router = useRouter();
 
   const handleBack = () => {
-    console.log("back");
+    router.back();
     if (onBack) onBack();
   };
 
