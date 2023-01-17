@@ -8,14 +8,19 @@ export type RecipeListResponse = {
 
 export type RecipeListRequest = {
   user_id?: number;
+  skip?: number;
+  limit?: number;
 };
 
 const getRecipeList = async (
   request: RecipeListRequest
 ): Promise<RecipeListResponse | null | undefined> => {
   try {
+    const { user_id, skip, limit } = request;
+    const userRequest = user_id ? `?user_id=${user_id}` : "";
+
     const result = await makeProtectedRequest(
-      `/food/recipe?user_id=${request.user_id}`,
+      `/food/recipe${userRequest}`,
       METHOD.GET
     );
 
