@@ -57,8 +57,11 @@ const getRecipe = async (
   request: RecipeRequest
 ): Promise<RecipeResponse | null | undefined> => {
   try {
+    const { user_id } = request;
+    const userRequest = user_id ? `?user_id=${user_id}` : "";
+
     const result = await makeProtectedRequest(
-      `/food/recipe/${request.recipe_id}?user_id=${request.user_id}`,
+      `/food/recipe/${request.recipe_id}${userRequest}`,
       METHOD.GET
     );
 
