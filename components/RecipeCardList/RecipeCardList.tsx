@@ -7,7 +7,7 @@ import {
 } from "./RecipeCarfList.styled";
 import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
-import getRecipe, { RecipeListResponse } from "@/services/recipe/getRecipeList";
+import { RecipeListResponse } from "@/services/recipe/getRecipeList";
 import { STATUS_CODE } from "@/services/http/httpStatusCode";
 import { RecipeData } from "@/services/recipe/getRecipe";
 import getRecipeList from "@/services/recipe/getRecipeList";
@@ -18,6 +18,7 @@ const recipeImg = `${IMAGE_PATH}/example-recipe.jpg`;
 
 type RecipeCardListProps = {
   scrollable?: boolean;
+  recipeList?: RecipeData[];
 };
 
 type RenderRecipeListType = {
@@ -78,7 +79,8 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
               imgHeight={imgHeight}
               width={scrollable ? DEFAULT_RECIPE_CARD_WIDTH : ""}
               recipe={recipe}
-              user={user}
+              user={recipe.user}
+              auth={user}
               isLiked={recipe.is_like || false}
             />
           </React.Fragment>

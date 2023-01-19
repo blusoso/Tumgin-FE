@@ -52,18 +52,16 @@ export enum PROFILE_SETTING_ID {
   LOGOUT = "logout",
 }
 
-const PROFILE_SETTING_LIST = [
-  {
-    id: "setting",
-    name: "ตั้งค่า",
-    icon: "settings-outline",
-  },
-  { id: "logout", name: "ออกจากระบบ", icon: "log-out-outline" },
-];
-
 type HomeNavbarProps = {
   showNavMobile?: boolean;
   showCenter?: boolean;
+};
+
+type ProfileSettingType = {
+  id: string;
+  name: string;
+  icon: string;
+  link?: string;
 };
 
 const PROFILE_MODAL_PADDING = "0.6rem 0";
@@ -85,6 +83,21 @@ const HomeNavbar = ({
   const MENU_ICON_SIZE = "1.4rem";
   const MENU_ICON_COLOR = themeContext.grayColor;
   const MENU_ICON_COLOR_ACTIVE = themeContext.greenColor;
+
+  const PROFILE_SETTING_LIST: ProfileSettingType[] = [
+    {
+      id: "fav-list",
+      name: "เมนูที่ชอบ",
+      icon: "heart-outline",
+      link: `/favorite`,
+    },
+    {
+      id: "setting",
+      name: "ตั้งค่า",
+      icon: "settings-outline",
+    },
+    { id: "logout", name: "ออกจากระบบ", icon: "log-out-outline" },
+  ];
 
   const welcomeText = (
     <div>
@@ -117,9 +130,11 @@ const HomeNavbar = ({
     router.reload();
   };
 
-  const handleProfileSettingLink = (profileSettingId: string) => {
-    if (profileSettingId === PROFILE_SETTING_ID.LOGOUT) {
+  const handleProfileSettingLink = (item: ProfileSettingType) => {
+    if (item.id === PROFILE_SETTING_ID.LOGOUT) {
       handleLogout();
+    } else {
+      if (item.link) router.push(item.link);
     }
   };
 
@@ -146,7 +161,7 @@ const HomeNavbar = ({
               <LinkHover
                 key={`profile-setting__${item.id}`}
                 className="flex items-center gap-1"
-                onClick={() => handleProfileSettingLink(item.id)}
+                onClick={() => handleProfileSettingLink(item)}
               >
                 <BaseIcon iconWidth="1.2rem">
                   <ReactSVG src={`${ICON_PATH}/${item.icon}.svg`} />

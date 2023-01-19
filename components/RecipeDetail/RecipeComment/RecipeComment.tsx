@@ -47,12 +47,7 @@ const RecipeComment = ({
 
   return (
     <>
-      <h3>
-        <span>ความคิดเห็น </span>
-        {reviewAmount > 0 && (
-          <span className="text-secondary">({reviewAmount})</span>
-        )}
-      </h3>
+      
 
       <div className="flex gap-2.5 mt-3">
         <MyAvatar img={profileImg} />

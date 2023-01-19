@@ -1,18 +1,22 @@
+import { useEffect, useState } from "react";
+
+import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
+import useCurrentUser from "@/utils/auth/useCurrentUser";
+import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
+
 import HomeNavbar from "@/components/Navbar/HomeNavbar/HomeNavbar";
 import SearchRecipe from "@/components/Search/SearchRecipe/SearchRecipe";
 import SavedReminder from "@/components/SavedRemider/SavedReminder";
 import { CategorySelector } from "@/components/SelectSlider/CategorySelector/CategorySelector";
 import TopicHeader from "@/components/TopicHeader/TopicHeader";
 import RecipeCardList from "@/components/RecipeCardList/RecipeCardList";
-import useDetectMobile from "@/utils/detectDevice/useDetectMobile";
 import TabMenu from "@/components/TabMenu/TabMenu";
-import useDetectTablet from "@/utils/detectDevice/useDetectTablet";
-import getCurrentUser from "services/auth/getCurrentUser";
-import { useEffect } from "react";
-import { getCookie } from "cookies-next";
-import { COOKIE_NAME } from "@/utils/cookies";
-import { useRecoilState } from "recoil";
-import { authState } from "@/recoils/index";
+
+import { RecipeData } from "@/services/recipe/getRecipe";
+import getRecipeList, {
+  RecipeListResponse,
+} from "@/services/recipe/getRecipeList";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 
 const TAB_MENU_LIST = [
   {
@@ -28,46 +32,49 @@ const TAB_MENU_LIST = [
 const Home = () => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
-  const [auth, setAuth] = useRecoilState(authState);
+  const { user } = useCurrentUser();
 
-  // const fetchCurrentUser = async () => {
-  //   const response = await getCurrentUser();
-  //   if (response) {
-  //     setAuth({ ...auth, user: response });
-  //   }
-  // };
+  const [recipeList, setRecipeList] = useState<RecipeData[] | undefined>();
 
-  // useEffect(() => {
-  //   const accessToken: any = getCookie(COOKIE_NAME.ACCESS_TOKEN);
-  //   const refreshToken: any = getCookie(COOKIE_NAME.REFRESH_TOKEN);
+  const fetchRecipeList = async () => {
+    const recipeListResponse: RecipeListResponse | null | undefined =
+      await getRecipeList({ user_id: user?.id });
 
-  //   if (accessToken && refreshToken) {
-  //     fetchCurrentUser();
-  //   }
-  // }, []);
+    if (recipeListResponse && recipeListResponse.status === STATUS_CODE.OK) {
+      setRecipeList(recipeListResponse.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecipeList();
+  }, [user]);
 
   const renderRecipeDesktop = (
     <div className="mt-5">
       <TabMenu tabMenuList={TAB_MENU_LIST} />
-      <RecipeCardList scrollable={false} />
+      <RecipeCardList scrollable={false} recipeList={recipeList} />
     </div>
   );
 
   const renderRecipeMobile = (
     <>
-      <div className="mt-5">
-        <TopicHeader
-          title="🔥 เมนูยอดนิยม"
-          linkLabel="ดูทั้งหมด"
-          link="/"
-          paddingIconTop="3px"
-        />
-        <RecipeCardList scrollable={true} />
-      </div>
-      <div className="mt-5">
-        <TopicHeader title="💖 แนะนำสำหรับคุณ" />
-        <RecipeCardList scrollable={false} />
-      </div>
+      {recipeList && (
+        <>
+          <div className="mt-5">
+            <TopicHeader
+              title="🔥 เมนูยอดนิยม"
+              linkLabel="ดูทั้งหมด"
+              link="/"
+              paddingIconTop="3px"
+            />
+            <RecipeCardList scrollable={true} recipeList={recipeList} />
+          </div>
+          <div className="mt-5">
+            <TopicHeader title="💖 แนะนำสำหรับคุณ" />
+            <RecipeCardList scrollable={false} recipeList={recipeList} />
+          </div>
+        </>
+      )}
     </>
   );
 

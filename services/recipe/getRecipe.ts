@@ -37,7 +37,7 @@ export type RecipeData = {
   user: UserResponse;
   recipe_ingredients?: RecipeIngredientData[];
   directions?: DirectionData[];
-  user_like_recipes: LikeRecipeData[];
+  user_like_recipes?: LikeRecipeData[];
   is_like?: boolean;
   reviews?: ReviewData[];
   review_amount: number;

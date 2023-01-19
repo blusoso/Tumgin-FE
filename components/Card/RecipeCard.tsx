@@ -28,6 +28,7 @@ export type RecipeCardProps = {
   imgHeight?: string;
   recipe: RecipeData;
   isLiked: boolean;
+  auth: any;
   user: any;
   width?: string;
 };
@@ -41,6 +42,7 @@ const RecipeCard = ({
   imgHeight,
   recipe,
   isLiked,
+  auth,
   user,
   width,
 }: RecipeCardProps) => {
@@ -52,9 +54,9 @@ const RecipeCard = ({
   const recipeLink = `/recipe/${recipe.id}/${recipe.slug}`;
 
   const toggleLikeRecipe = async () => {
-    if (user && recipe) {
+    if (auth && recipe) {
       const likeRecipeRequest: LikeRecipeRequest = {
-        user_id: user.id,
+        user_id: auth.id,
         recipe_id: recipe.id,
       };
 
@@ -70,12 +72,12 @@ const RecipeCard = ({
     <div className={className} style={{ width: width || "inherit" }}>
       <div className="flex gap-3 items-center">
         <BaseAvatar
-          img={recipe.user.profile_img || ""}
+          img={auth.profile_img || ""}
           size="36px"
           borderRadius={themeContext.borderRadiusSm}
         />
         <div>
-          <h3>{recipe.user.username}</h3>
+          <h3>{auth.username}</h3>
           <CreatedAtLabel>{moment(recipe.created_at).fromNow()}</CreatedAtLabel>
         </div>
         <div className="ml-auto">
