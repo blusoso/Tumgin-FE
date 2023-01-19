@@ -72,12 +72,12 @@ const RecipeCard = ({
     <div className={className} style={{ width: width || "inherit" }}>
       <div className="flex gap-3 items-center">
         <BaseAvatar
-          img={auth.profile_img || ""}
+          img={user.profile_img || ""}
           size="36px"
           borderRadius={themeContext.borderRadiusSm}
         />
         <div>
-          <h3>{auth.username}</h3>
+          <h3>{user.username}</h3>
           <CreatedAtLabel>{moment(recipe.created_at).fromNow()}</CreatedAtLabel>
         </div>
         <div className="ml-auto">

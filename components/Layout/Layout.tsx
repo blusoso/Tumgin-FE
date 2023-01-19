@@ -28,7 +28,15 @@ export enum PATH_NAME {
   RECIPE = "/recipe/[id]/[slug]",
   SIGN_IN = "/session/new",
   SIGN_UP = "/session/new/sign-up",
+  FAVORITE = "/favorite",
 }
+
+const pathPreventLoggedInUserList: string[] = [
+  PATH_NAME.SIGN_IN,
+  PATH_NAME.SIGN_UP,
+];
+
+const pathPreventGuestList: string[] = [PATH_NAME.FAVORITE];
 
 const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
@@ -60,8 +68,16 @@ const Layout = ({ children }: LayoutProps) => {
   }, [pathname]);
 
   const preventLoggedInUser = () => {
-    if (pathname === PATH_NAME.SIGN_IN || pathname === PATH_NAME.SIGN_UP) {
+    if (pathPreventLoggedInUserList.includes(pathname)) {
       if (user) {
+        router.push("/");
+      }
+    }
+  };
+
+  const preventGuest = () => {
+    if (pathPreventGuestList.includes(pathname)) {
+      if (!user) {
         router.push("/");
       }
     }
@@ -75,6 +91,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   useEffect(() => {
     preventLoggedInUser();
+    preventGuest();
     redirectUserPreference();
   }, [pathname, user]);
 
