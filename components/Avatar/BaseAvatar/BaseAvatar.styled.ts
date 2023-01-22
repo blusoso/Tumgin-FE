@@ -13,7 +13,7 @@ export const BaseAvatarWrapper = styled.div<BaseAvatarWrapperType>`
     borderRadius || theme.borderRadiusLg};
 
   background-image: ${({ img }) => `url("${img}")`};
-  background-color: #fff;
+  background-color: ${({ theme }) => theme.lightGreenColor};
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

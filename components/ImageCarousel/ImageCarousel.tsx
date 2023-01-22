@@ -34,29 +34,32 @@ const ImageCarousel = ({ images, imgHeight }: ImageCarouselProps) => {
         />
       </AnimatePresence>
 
-      <ImageCarouselButtonWrapper>
-        <div className="flex justify-between p-2">
-          <ImageCarouselButton
-            whileTap={{ scale: WHILE_TAP_SCALE_BUTTON }}
-            onClick={handlePrev}
-          >
-            <ChevronIcon rotation="left" color="white" />
-          </ImageCarouselButton>
+      {images.length > 1 && (
+        <>
+          <ImageCarouselButtonWrapper>
+            <div className="flex justify-between p-2">
+              <ImageCarouselButton
+                whileTap={{ scale: WHILE_TAP_SCALE_BUTTON }}
+                onClick={handlePrev}
+              >
+                <ChevronIcon rotation="left" color="white" />
+              </ImageCarouselButton>
 
-          <ImageCarouselButton
-            whileTap={{ scale: WHILE_TAP_SCALE_BUTTON }}
-            onClick={handleNext}
-          >
-            <ChevronIcon rotation="right" color="white" />
-          </ImageCarouselButton>
-        </div>
-      </ImageCarouselButtonWrapper>
-
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <div className="text-center text-white">
-          {currentIndex + 1} / {images.length}
-        </div>
-      </div>
+              <ImageCarouselButton
+                whileTap={{ scale: WHILE_TAP_SCALE_BUTTON }}
+                onClick={handleNext}
+              >
+                <ChevronIcon rotation="right" color="white" />
+              </ImageCarouselButton>
+            </div>
+          </ImageCarouselButtonWrapper>
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <div className="text-center text-white">
+              {currentIndex + 1} / {images.length}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

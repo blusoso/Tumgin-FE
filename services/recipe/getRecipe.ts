@@ -1,8 +1,19 @@
+import { RECIPE_IMG_TYPE } from "./getRecipeImg";
 import makeProtectedRequest, { METHOD } from "@/utils/api/makeProtectedRequest";
 import { UserResponse } from "../auth/createUser";
 import { RecipeIngredientData } from "./getRecipeIngredientList";
 import { LikeRecipeData } from "./likeRecipe";
 import { ReviewData } from "./getReviewList";
+
+export type ImageData = {
+  id: number;
+  img: string;
+  img_format?: string;
+  img_size?: number;
+  created_at: Date;
+  updated_at?: Date;
+  deleted_at?: Date;
+};
 
 export type DirectionData = {
   id: number;
@@ -15,6 +26,17 @@ export type DirectionData = {
   deleted_at?: Date;
 };
 
+export type RecipeImageData = {
+  id: number;
+  recipe_id: number;
+  image_id: number;
+  type: RECIPE_IMG_TYPE;
+  created_at: Date;
+  deleted_at?: Date;
+  updated_at?: Date;
+  image: ImageData;
+};
+
 export type RecipeData = {
   id: number;
   name: string;
@@ -22,6 +44,7 @@ export type RecipeData = {
   slug: string;
   description: string;
   thumbnail_img?: string;
+  recipe_images: RecipeImageData[];
   difficult_level?: number;
   calory?: number;
   minute?: number;

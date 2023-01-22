@@ -17,6 +17,7 @@ import {
 } from "./RecipeCard.styled";
 import { formatTime } from "@/utils/time";
 import likeRecipe, { LikeRecipeRequest } from "@/services/recipe/likeRecipe";
+import { IMAGE_PATH } from "@/utils/constant";
 
 export type Author = {
   img: string;
@@ -35,7 +36,7 @@ export type RecipeCardProps = {
 
 const MORE_HORIZONTAL_ICON_WIDTH = "1.4rem";
 const HEART_ICON_WIDTH = "1.7rem";
-export const DEFAULT_THUMBNAIL_IMG = "";
+export const DEFAULT_THUMBNAIL_IMG = `${IMAGE_PATH}/default-image.jpg`;
 
 const RecipeCard = ({
   className,

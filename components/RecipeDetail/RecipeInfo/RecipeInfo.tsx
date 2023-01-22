@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 
 import { RecipeData } from "@/services/recipe/getRecipe";
@@ -24,8 +24,21 @@ const EXAMPLE_IMG_LIST = [
   `${IMAGE_PATH}/example-recipe-4.jpg`,
 ];
 
+const DEFAULT_IMG = `${IMAGE_PATH}/default-image.jpg`;
+
 const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
   const isMobile = useDetectMobile();
+  const [imageList, setImageList] = useState<string[]>([]);
+
+  console.log(recipe);
+
+  useEffect(() => {
+    if (recipe) {
+      setImageList(
+        recipe.recipe_images.map((recipeImg) => recipeImg.image.img)
+      );
+    }
+  }, [recipe]);
 
   const nutritionList = [
     {
@@ -95,10 +108,17 @@ const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
       </div>
 
       <div className="my-3">
-        <ImageCarousel
-          images={EXAMPLE_IMG_LIST}
-          imgHeight={isMobile ? "15rem" : "28rem"}
-        />
+        {imageList.length > 0 ? (
+          <ImageCarousel
+            images={imageList}
+            imgHeight={isMobile ? "15rem" : "28rem"}
+          />
+        ) : (
+          <ImageCarousel
+            images={[DEFAULT_IMG]}
+            imgHeight={isMobile ? "15rem" : "28rem"}
+          />
+        )}
       </div>
       <div className="flex justify-between">
         <p className="text-secondary">
