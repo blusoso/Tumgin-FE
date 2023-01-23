@@ -398,14 +398,17 @@ const RecipeDetail = () => {
               </div>
 
               {showLoadMoreReviewButton && (
-                <LoadMoreButton onLoadMoreClick={handleLoadMoreReview} />
+                <LoadMoreButton
+                  text="ดูความคิดเห็นเพิ่ม"
+                  onLoadMoreClick={handleLoadMoreReview}
+                />
               )}
             </>
           )}
         </div>
       )}
 
-      <div className={`mb-12 ${!isMobile ? "px-10" : ""}`}>
+      {/* <div className={`mb-12 ${!isMobile ? "px-10" : ""}`}>
         <HorizonLine />
 
         <TopicHeader title="🍻 สูตรอาหารที่คล้ายกัน" />
@@ -415,7 +418,7 @@ const RecipeDetail = () => {
           <TopicHeader title="🥨 สูตรอาหารที่คุณอาจจะชอบ" />
           <RecipeCardList scrollable={true} />
         </div>
-      </div>
+      </div> */}
 
       {/* <ButtonFooter iconStart={renderCookingIcon} onClick={startCooking}>
         เริ่มทำอาหาร

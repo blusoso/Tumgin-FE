@@ -28,12 +28,15 @@ type RenderRecipeListType = {
 
 const DEFAULT_RECIPE_CARD_WIDTH = "170px";
 
-const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
+const RecipeCardList = ({
+  scrollable = false,
+  recipeList,
+}: RecipeCardListProps) => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
   const { user } = useCurrentUser();
 
-  const [recipeList, setRecipeList] = useState<RecipeData[] | undefined>();
+  // const [recipeList, setRecipeList] = useState<RecipeData[] | undefined>();
 
   let grid: number;
   let imgHeight: string;
@@ -49,18 +52,18 @@ const RecipeCardList = ({ scrollable = false }: RecipeCardListProps) => {
     imgHeight = "14rem";
   }
 
-  const fetchRecipeList = async () => {
-    const recipeListResponse: RecipeListResponse | null | undefined =
-      await getRecipeList({ user_id: user?.id });
+  // const fetchRecipeList = async () => {
+  //   const recipeListResponse: RecipeListResponse | null | undefined =
+  //     await getRecipeList({ user_id: user?.id });
 
-    if (recipeListResponse && recipeListResponse.status === STATUS_CODE.OK) {
-      setRecipeList(recipeListResponse.data);
-    }
-  };
+  //   if (recipeListResponse && recipeListResponse.status === STATUS_CODE.OK) {
+  //     setRecipeList(recipeListResponse.data);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchRecipeList();
-  }, [user]);
+  // useEffect(() => {
+  //   fetchRecipeList();
+  // }, [user]);
 
   const renderRecipeList = ({
     scrollable,

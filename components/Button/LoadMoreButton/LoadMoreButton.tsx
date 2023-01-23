@@ -2,7 +2,7 @@ import React from "react";
 import Button, { BUTTON_TYPE } from "../Button";
 import ChevronIcon from "@/components/Icon/ChevronIcon";
 
-const DEFAULT_LOAD_MORE_BUTTON_TEXT = "ดูความคิดเห็นเพิ่ม";
+const DEFAULT_LOAD_MORE_BUTTON_TEXT = "แสดงเพิ่ม";
 
 type LoadMoreButtonProps = {
   text?: string;

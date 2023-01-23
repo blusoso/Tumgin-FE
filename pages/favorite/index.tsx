@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import HomeNavbar from "@/components/Navbar/HomeNavbar/HomeNavbar";
 import TopicHeader from "@/components/TopicHeader/TopicHeader";
-import RecipeCardList from "@/components/RecipeCardList/RecipeCardList";
 import useCurrentUser from "@/utils/auth/useCurrentUser";
 import getLikeRecipeList, {
   LikeRecipeListData,

@@ -17,20 +17,11 @@ type RecipeInfoProps = {
   recipe: RecipeData;
 };
 
-const EXAMPLE_IMG_LIST = [
-  `${IMAGE_PATH}/example-recipe.jpg`,
-  `${IMAGE_PATH}/example-recipe-2.jpg`,
-  `${IMAGE_PATH}/example-recipe-3.jpg`,
-  `${IMAGE_PATH}/example-recipe-4.jpg`,
-];
-
 const DEFAULT_IMG = `${IMAGE_PATH}/default-image.jpg`;
 
 const RecipeInfo = ({ recipe }: RecipeInfoProps) => {
   const isMobile = useDetectMobile();
   const [imageList, setImageList] = useState<string[]>([]);
-
-  console.log(recipe);
 
   useEffect(() => {
     if (recipe) {

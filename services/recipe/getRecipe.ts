@@ -65,6 +65,7 @@ export type RecipeData = {
   reviews?: ReviewData[];
   review_amount: number;
   review_avg: number;
+  total_recipe?: number;
 };
 
 export type RecipeResponse = {

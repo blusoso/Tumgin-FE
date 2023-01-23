@@ -17,6 +17,7 @@ import getRecipeList, {
   RecipeListResponse,
 } from "@/services/recipe/getRecipeList";
 import { STATUS_CODE } from "@/services/http/httpStatusCode";
+import LoadMoreButton from "@/components/Button/LoadMoreButton/LoadMoreButton";
 
 const TAB_MENU_LIST = [
   {
@@ -29,25 +30,54 @@ const TAB_MENU_LIST = [
   },
 ];
 
+const DEFAULT_RECIPE_LIMIT = 10;
+
 const Home = () => {
   const isMobile = useDetectMobile();
   const isTablet = useDetectTablet();
   const { user } = useCurrentUser();
 
   const [recipeList, setRecipeList] = useState<RecipeData[] | undefined>();
+  const [totalRecipes, setTotalRecipes] = useState<number>(0);
+  const [skipRecipe, setSkipRecipe] = useState<number>(0);
+  const [isRecipeListFetched, setIsRecipeListFetched] = useState(false);
 
-  const fetchRecipeList = async () => {
+  const fetchRecipeList = async ({ skip }: { skip: number }) => {
     const recipeListResponse: RecipeListResponse | null | undefined =
-      await getRecipeList({ user_id: user?.id });
+      await getRecipeList({
+        user_id: user?.id,
+        skip: skip,
+        limit: DEFAULT_RECIPE_LIMIT,
+      });
 
     if (recipeListResponse && recipeListResponse.status === STATUS_CODE.OK) {
-      setRecipeList(recipeListResponse.data);
+      if (!recipeList) {
+        setRecipeList(recipeListResponse.data.recipes);
+      } else {
+        setRecipeList([...recipeList, ...recipeListResponse.data.recipes]);
+      }
+
+      setTotalRecipes(recipeListResponse.data.total_recipes);
+      setIsRecipeListFetched(true);
     }
   };
 
   useEffect(() => {
-    fetchRecipeList();
+    if (user && !isRecipeListFetched) {
+      fetchRecipeList({ skip: 0 });
+    }
   }, [user]);
+
+  const handleLoadMoreRecipe = async () => {
+    if (recipeList && recipeList.length > 0) {
+      if (skipRecipe < totalRecipes - 1) {
+        const nextRecipe = skipRecipe + DEFAULT_RECIPE_LIMIT;
+
+        setSkipRecipe(nextRecipe);
+        await fetchRecipeList({ skip: nextRecipe });
+      }
+    }
+  };
 
   const renderRecipeDesktop = (
     <div className="mt-5">
@@ -58,9 +88,9 @@ const Home = () => {
 
   const renderRecipeMobile = (
     <>
-      {recipeList && (
+      {recipeList && recipeList.length > 0 && (
         <>
-          <div className="mt-5">
+          {/* <div className="mt-5">
             <TopicHeader
               title="🔥 เมนูยอดนิยม"
               linkLabel="ดูทั้งหมด"
@@ -71,6 +101,10 @@ const Home = () => {
           </div>
           <div className="mt-5">
             <TopicHeader title="💖 แนะนำสำหรับคุณ" />
+            <RecipeCardList scrollable={false} recipeList={recipeList} />
+          </div> */}
+          <div className="mt-5">
+            <TopicHeader title="💖 เมนูทั้งหมด" />
             <RecipeCardList scrollable={false} recipeList={recipeList} />
           </div>
         </>
@@ -90,8 +124,16 @@ const Home = () => {
       <div className="my-5">
         <CategorySelector />
       </div>
-      {isMobile && <SavedReminder savedTryAmount={12} />}
-      {isMobile ? renderRecipeMobile : renderRecipeDesktop}
+      {recipeList && recipeList.length > 0 && (
+        <>
+          {isMobile && <SavedReminder savedTryAmount={12} />}
+          {isMobile ? renderRecipeMobile : renderRecipeDesktop}
+
+          {recipeList.length < totalRecipes && (
+            <LoadMoreButton onLoadMoreClick={handleLoadMoreRecipe} />
+          )}
+        </>
+      )}
     </>
   );
 };

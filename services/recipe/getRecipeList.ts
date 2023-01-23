@@ -1,9 +1,14 @@
 import makeProtectedRequest, { METHOD } from "@/utils/api/makeProtectedRequest";
 import { RecipeData } from "./getRecipe";
 
+export type RecipeListData = {
+  total_recipes: number;
+  recipes: RecipeData[];
+};
+
 export type RecipeListResponse = {
   status: number;
-  data: RecipeData[];
+  data: RecipeListData;
 };
 
 export type RecipeListRequest = {
@@ -18,9 +23,11 @@ const getRecipeList = async (
   try {
     const { user_id, skip, limit } = request;
     const userRequest = user_id ? `?user_id=${user_id}` : "";
+    const skipRequest = skip ? `&skip=${skip}` : "";
+    const limitRequest = limit ? `&limit=${limit}` : "";
 
     const result = await makeProtectedRequest(
-      `/food/recipe${userRequest}`,
+      `/food/recipe${userRequest}${skipRequest}${limitRequest}`,
       METHOD.GET
     );
 
