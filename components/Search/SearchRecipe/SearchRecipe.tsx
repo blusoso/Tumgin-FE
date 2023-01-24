@@ -17,6 +17,7 @@ import SelectModal from "@/components/Select/SelectModal/SelectModal";
 import { IngredientSelector } from "@/components/SelectSlider/IngredientSelector/IngredientSelector";
 import {
   LinkHover,
+  NoContentSearchResult,
   RecommendSearchStyle,
   SearchInputWrapper,
   SearchSelectWrapper,
@@ -25,6 +26,12 @@ import HistorySearch from "@/components/HistorySearch/HistorySearch";
 import HorizonLine from "@/components/HorizonLine/HorizonLine";
 import Trend from "@/components/Trend/Trend";
 import StaffPickList from "@/components/StaffPickList/StaffPickList";
+import getSearchRecipe, {
+  SearchRecipeData,
+  SearchRecipeRequest,
+  SearchRecipeResponse,
+} from "@/services/search/getSearchRecipe";
+import { STATUS_CODE } from "@/services/http/httpStatusCode";
 
 const SEARCH_KEYWORD_PLACEHOLDER = "ค้นหาสูตรอาหาร";
 const SEARCH_INGREDIENT_PLACEHOLDER = "ค้นหาจากส่วนผสม";
@@ -53,6 +60,9 @@ const SearchRecipe = ({}: SearchRecipeProps) => {
   const { searchMode } = search;
   const [isOpenSearch, setIsOpenSearch] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState("");
+  const [searchResultList, setSearchResultList] = useState<
+    SearchRecipeData[] | []
+  >([]);
 
   const searchIcon = <ReactSVG src={`${ICON_PATH}/search-outline.svg`} />;
   const swapIcon = <ReactSVG src={`${ICON_PATH}/swap-outline.svg`} />;
@@ -94,20 +104,43 @@ const SearchRecipe = ({}: SearchRecipeProps) => {
 
   const renderSearchResultList = () => (
     <>
-      {SEARCH_RESULT_MOCKUP &&
-        SEARCH_RESULT_MOCKUP.map((result) => (
+      {searchResultList.length > 0 ? (
+        searchResultList.map((result) => (
           <LinkHover
             key={`search-result__${result.slug}--${result.id}`}
             onClick={() => handleSearchResultClick(result)}
           >
             {result.name}
           </LinkHover>
-        ))}
+        ))
+      ) : (
+        <NoContentSearchResult>
+          -- ไม่พบผลลัพธ์ที่กำลังค้นหา --
+        </NoContentSearchResult>
+      )}
     </>
   );
 
-  const onChangeSearchInput = (value: string) => {
+  const onChangeSearchInput = async (value: string) => {
     setSearchInputValue(value);
+
+    if (value) {
+      const searchRequest: SearchRecipeRequest = {
+        q: value,
+      };
+
+      const searchRecipeResponse: SearchRecipeResponse | null | undefined =
+        await getSearchRecipe(searchRequest);
+
+      if (
+        searchRecipeResponse &&
+        searchRecipeResponse.status === STATUS_CODE.OK
+      ) {
+        setSearchResultList(searchRecipeResponse.data);
+      }
+    } else {
+      setSearchResultList([]);
+    }
   };
 
   return (

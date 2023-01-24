@@ -31,3 +31,9 @@ export const LinkHover = styled.div<LinkHoverProps>`
 export const RecommendSearchStyle = styled.div<LinkHoverProps>`
   padding: ${({ padding }) => padding || DEFAULT_PADDING_SEARCH_SELECT_MODAL};
 `;
+
+export const NoContentSearchResult = styled.div<LinkHoverProps>`
+  padding: ${({ padding }) => padding || DEFAULT_PADDING_SEARCH_SELECT_MODAL};
+  color: ${({ theme }) => theme.grayColor};
+  cursor: auto;
+`;

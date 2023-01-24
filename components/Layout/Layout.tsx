@@ -91,7 +91,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   useEffect(() => {
     preventLoggedInUser();
-    preventGuest();
+    // preventGuest();
     redirectUserPreference();
   }, [pathname, user]);
 
