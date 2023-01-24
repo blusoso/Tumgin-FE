@@ -27,8 +27,8 @@ export type BaseModalProps = {
   position?: string;
   isOverlay?: boolean;
   isOpen?: boolean;
-  hasClose: boolean;
-  title?: string;
+  hasClose?: boolean;
+  title?: string | React.ReactNode;
   children: JSX.Element;
   childrenColor?: string;
   hasBorder?: boolean;

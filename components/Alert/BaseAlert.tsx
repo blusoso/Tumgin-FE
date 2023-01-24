@@ -5,9 +5,10 @@ import BaseModal, { ALIGN_ITEM } from "../Modal/BaseModal/BaseModal";
 type BaseAlertProps = {
   iconStart?: React.ReactNode;
   message: string;
+  width?: string;
 };
 
-const BaseAlert = ({ iconStart, message }: BaseAlertProps) => {
+const BaseAlert = ({ iconStart, message, width = "93%" }: BaseAlertProps) => {
   return (
     <>
       <motion.div
@@ -22,7 +23,7 @@ const BaseAlert = ({ iconStart, message }: BaseAlertProps) => {
           isOpen={true}
           hasClose={false}
           onPrimaryClick={() => console.log("xx")}
-          width="93%"
+          width={width}
           alignItem={ALIGN_ITEM.TOP}
           top="1.5%"
           right="0"

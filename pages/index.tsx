@@ -63,7 +63,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (user && !isRecipeListFetched) {
+    if (!isRecipeListFetched) {
       fetchRecipeList({ skip: 0 });
     }
   }, [user]);
